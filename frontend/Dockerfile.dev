@@ -1,0 +1,17 @@
+# frontend/Dockerfile.dev
+FROM node:18
+
+WORKDIR /app
+
+# 预安装依赖缓存
+COPY package*.json ./
+RUN npm install
+
+# 复制所有代码
+COPY . .
+
+# 设置正确的权限
+RUN chmod -R 777 /app
+
+# 启动开发服务器
+CMD ["npm", "run", "dev"]
