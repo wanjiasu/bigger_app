@@ -47,6 +47,8 @@ cd my-fullstack-app
 ```bash
 cp .env.example .env
 # 编辑 .env 文件设置您的环境变量
+openssl rand -base64 32
+# 生成 NC_AUTH_JWT_SECRET
 ```
 
 3. 启动服务
