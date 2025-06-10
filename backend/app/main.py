@@ -57,17 +57,25 @@ async def generate_note(request: NoteGenerateRequest, db: Session = Depends(get_
     try:
         # 调用DeepSeek API生成内容
         result = await deepseek_service.generate_xiaohongshu_note(
-            scenario=request.scenario,
-            persona=request.persona,
-            hotspot=request.hotspot
+            basic_content=request.basic_content,
+            note_purpose=request.note_purpose,
+            recent_trends=request.recent_trends,
+            writing_style=request.writing_style,
+            target_audience=request.target_audience,
+            content_type=request.content_type,
+            reference_links=request.reference_links
         )
         
         if result["success"]:
             # 保存到数据库
             note_data = NoteCreate(
-                input_scenario=request.scenario,
-                input_persona=request.persona,
-                input_hotspot=request.hotspot,
+                input_basic_content=request.basic_content,
+                input_note_purpose=request.note_purpose,
+                input_recent_trends=request.recent_trends,
+                input_writing_style=request.writing_style,
+                input_target_audience=request.target_audience,
+                input_content_type=request.content_type,
+                input_reference_links=request.reference_links,
                 note_title=result["data"]["note_title"],
                 note_content=result["data"]["note_content"],
                 comment_guide=result["data"]["comment_guide"],

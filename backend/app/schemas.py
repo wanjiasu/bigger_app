@@ -17,14 +17,22 @@ class UserOut(BaseModel):
         from_attributes = True
 
 class NoteGenerateRequest(BaseModel):
-    scenario: str  # 痛点场景
-    persona: Optional[str] = None  # 人设
-    hotspot: Optional[str] = None  # 热点
+    basic_content: str  # 基本内容
+    note_purpose: Optional[str] = None  # 笔记目的
+    recent_trends: Optional[str] = None  # 近期热梗
+    writing_style: Optional[str] = None  # 写作风格
+    target_audience: Optional[str] = None  # 内容受众
+    content_type: Optional[str] = None  # 内容类型
+    reference_links: Optional[str] = None  # 参考链接
 
 class NoteCreate(BaseModel):
-    input_scenario: str
-    input_persona: Optional[str] = None
-    input_hotspot: Optional[str] = None
+    input_basic_content: str
+    input_note_purpose: Optional[str] = None
+    input_recent_trends: Optional[str] = None
+    input_writing_style: Optional[str] = None
+    input_target_audience: Optional[str] = None
+    input_content_type: Optional[str] = None
+    input_reference_links: Optional[str] = None
     note_title: str
     note_content: str
     comment_guide: str
@@ -38,9 +46,13 @@ class NoteUpdate(BaseModel):
 
 class NoteOut(BaseModel):
     id: int
-    input_scenario: str
-    input_persona: Optional[str]
-    input_hotspot: Optional[str]
+    input_basic_content: str
+    input_note_purpose: Optional[str]
+    input_recent_trends: Optional[str]
+    input_writing_style: Optional[str]
+    input_target_audience: Optional[str]
+    input_content_type: Optional[str]
+    input_reference_links: Optional[str]
     note_title: str
     note_content: str
     comment_guide: str

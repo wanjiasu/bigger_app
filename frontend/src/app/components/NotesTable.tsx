@@ -8,9 +8,13 @@ import { EditNoteModal } from './EditNoteModal'
 
 interface Note {
   id: number
-  input_scenario: string
-  input_persona: string | null
-  input_hotspot: string | null
+  input_basic_content: string
+  input_note_purpose: string | null
+  input_recent_trends: string | null
+  input_writing_style: string | null
+  input_target_audience: string | null
+  input_content_type: string | null
+  input_reference_links: string | null
   note_title: string
   note_content: string
   comment_guide: string
@@ -83,12 +87,16 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
 
   const filteredNotes = notes.filter(note =>
     note.note_title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    note.input_scenario.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (note.input_persona && note.input_persona.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (note.input_hotspot && note.input_hotspot.toLowerCase().includes(searchTerm.toLowerCase()))
+    note.input_basic_content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (note.input_note_purpose && note.input_note_purpose.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (note.input_recent_trends && note.input_recent_trends.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (note.input_writing_style && note.input_writing_style.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (note.input_target_audience && note.input_target_audience.toLowerCase().includes(searchTerm.toLowerCase())) ||
+    (note.input_content_type && note.input_content_type.toLowerCase().includes(searchTerm.toLowerCase()))
   )
 
-  const truncateText = (text: string, maxLength: number) => {
+  const truncateText = (text: string | null | undefined, maxLength: number) => {
+    if (!text) return '-'
     return text.length > maxLength ? text.substring(0, maxLength) + '...' : text
   }
 
@@ -156,9 +164,10 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
             <thead>
               <tr className="border-b border-gray-200">
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">标题</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">场景</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">人设</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">热点</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">基本内容</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">内容类型</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">目标受众</th>
+                <th className="text-left py-3 px-4 font-semibold text-gray-700">写作风格</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">创建时间</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">操作</th>
               </tr>
@@ -173,17 +182,22 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
                   </td>
                   <td className="py-4 px-4">
                     <div className="text-gray-600">
-                      {truncateText(note.input_scenario, 40)}
+                      {truncateText(note.input_basic_content, 40)}
                     </div>
                   </td>
                   <td className="py-4 px-4">
                     <div className="text-gray-600">
-                      {note.input_persona || '-'}
+                      {truncateText(note.input_content_type, 20)}
                     </div>
                   </td>
                   <td className="py-4 px-4">
                     <div className="text-gray-600">
-                      {note.input_hotspot || '-'}
+                      {truncateText(note.input_target_audience, 20)}
+                    </div>
+                  </td>
+                  <td className="py-4 px-4">
+                    <div className="text-gray-600">
+                      {truncateText(note.input_writing_style, 20)}
                     </div>
                   </td>
                   <td className="py-4 px-4">

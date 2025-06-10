@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { NoteGenerator } from './components/NoteGenerator'
 import { NotesTable } from './components/NotesTable'
-import { FileText, Sparkles, Home, BarChart3, Users, Settings, HelpCircle } from 'lucide-react'
+import { FileText, Sparkles, Home, BarChart3, Users, Settings, HelpCircle, Shield, TrendingUp } from 'lucide-react'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'generate' | 'manage'>('generate')
@@ -11,14 +11,13 @@ export default function Home() {
 
   const handleNoteGenerated = () => {
     setRefreshTrigger(prev => prev + 1)
-    setActiveTab('manage')
   }
 
   const sidebarItems = [
-    { id: 'generate', label: '生成笔记', icon: Sparkles, active: activeTab === 'generate' },
-    { id: 'manage', label: '管理笔记', icon: FileText, active: activeTab === 'manage' },
-    { id: 'analytics', label: '数据概览', icon: BarChart3, active: false, disabled: true },
-    { id: 'users', label: '用户分布', icon: Users, active: false, disabled: true },
+    { id: 'account', label: '账号管理', icon: Users, active: false, disabled: true },
+    { id: 'generate', label: '内容生成', icon: Sparkles, active: activeTab === 'generate' },
+    { id: 'violation', label: '违规检测', icon: Shield, active: false, disabled: true },
+    { id: 'tracking', label: '数据追踪', icon: TrendingUp, active: false, disabled: true },
   ]
 
   const bottomItems = [
@@ -38,9 +37,9 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-                小红书笔记
+                智能内容平台
               </h1>
-              <p className="text-sm text-gray-500">生成器</p>
+              <p className="text-sm text-gray-500">管理系统</p>
             </div>
           </div>
         </div>
@@ -51,9 +50,9 @@ export default function Home() {
             {sidebarItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => !item.disabled && setActiveTab(item.id as 'generate' | 'manage')}
+                onClick={() => !item.disabled && item.id === 'generate' && setActiveTab(item.id as 'generate' | 'manage')}
                 disabled={item.disabled}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 ${
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 relative ${
                   item.active
                     ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md'
                     : item.disabled
@@ -63,6 +62,11 @@ export default function Home() {
               >
                 <item.icon className="w-5 h-5" />
                 <span className="font-medium">{item.label}</span>
+                {item.disabled && (
+                  <span className="ml-auto text-xs bg-gray-200 text-gray-500 px-2 py-1 rounded-full">
+                    待开发
+                  </span>
+                )}
               </button>
             ))}
           </nav>
@@ -75,10 +79,13 @@ export default function Home() {
               <button
                 key={item.id}
                 disabled={item.disabled}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 text-gray-400 cursor-not-allowed"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 text-gray-400 cursor-not-allowed relative"
               >
                 <item.icon className="w-5 h-5" />
                 <span className="font-medium">{item.label}</span>
+                <span className="ml-auto text-xs bg-gray-200 text-gray-500 px-2 py-1 rounded-full">
+                  待开发
+                </span>
               </button>
             ))}
           </nav>
@@ -92,7 +99,7 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
-                {activeTab === 'generate' ? '生成笔记' : '管理笔记'}
+                {activeTab === 'generate' ? '内容生成' : '管理笔记'}
               </h2>
               <p className="text-gray-600 mt-1">
                 {activeTab === 'generate' 

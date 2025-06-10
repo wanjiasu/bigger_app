@@ -5,9 +5,13 @@ import { useState } from 'react'
 
 interface Note {
   id: number
-  input_scenario: string
-  input_persona: string | null
-  input_hotspot: string | null
+  input_basic_content: string
+  input_note_purpose: string | null
+  input_recent_trends: string | null
+  input_writing_style: string | null
+  input_target_audience: string | null
+  input_content_type: string | null
+  input_reference_links: string | null
   note_title: string
   note_content: string
   comment_guide: string
@@ -50,7 +54,7 @@ export function NoteDetailModal({ note, onClose }: NoteDetailModalProps) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-hidden">
+      <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
           <h2 className="text-2xl font-bold text-gray-800">笔记详情</h2>
@@ -71,38 +75,86 @@ export function NoteDetailModal({ note, onClose }: NoteDetailModalProps) {
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <label className="text-sm font-medium text-gray-700">痛点场景</label>
-                    <CopyButton text={note.input_scenario} fieldName="scenario" />
+                    <label className="text-sm font-medium text-gray-700">基本内容</label>
+                    <CopyButton text={note.input_basic_content} fieldName="basic_content" />
                   </div>
                   <p className="text-gray-800 bg-white p-3 rounded border">
-                    {note.input_scenario}
+                    {note.input_basic_content}
                   </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-700">人设</label>
-                      {note.input_persona && (
-                        <CopyButton text={note.input_persona} fieldName="persona" />
+                      <label className="text-sm font-medium text-gray-700">笔记目的</label>
+                      {note.input_note_purpose && (
+                        <CopyButton text={note.input_note_purpose} fieldName="note_purpose" />
                       )}
                     </div>
                     <p className="text-gray-800 bg-white p-3 rounded border">
-                      {note.input_persona || '未设置'}
+                      {note.input_note_purpose || '未设置'}
                     </p>
                   </div>
 
                   <div>
                     <div className="flex items-center justify-between mb-2">
-                      <label className="text-sm font-medium text-gray-700">热点</label>
-                      {note.input_hotspot && (
-                        <CopyButton text={note.input_hotspot} fieldName="hotspot" />
+                      <label className="text-sm font-medium text-gray-700">近期热梗</label>
+                      {note.input_recent_trends && (
+                        <CopyButton text={note.input_recent_trends} fieldName="recent_trends" />
                       )}
                     </div>
                     <p className="text-gray-800 bg-white p-3 rounded border">
-                      {note.input_hotspot || '未设置'}
+                      {note.input_recent_trends || '未设置'}
                     </p>
                   </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-gray-700">写作风格</label>
+                      {note.input_writing_style && (
+                        <CopyButton text={note.input_writing_style} fieldName="writing_style" />
+                      )}
+                    </div>
+                    <p className="text-gray-800 bg-white p-3 rounded border">
+                      {note.input_writing_style || '未设置'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-gray-700">目标受众</label>
+                      {note.input_target_audience && (
+                        <CopyButton text={note.input_target_audience} fieldName="target_audience" />
+                      )}
+                    </div>
+                    <p className="text-gray-800 bg-white p-3 rounded border">
+                      {note.input_target_audience || '未设置'}
+                    </p>
+                  </div>
+
+                  <div>
+                    <div className="flex items-center justify-between mb-2">
+                      <label className="text-sm font-medium text-gray-700">内容类型</label>
+                      {note.input_content_type && (
+                        <CopyButton text={note.input_content_type} fieldName="content_type" />
+                      )}
+                    </div>
+                    <p className="text-gray-800 bg-white p-3 rounded border">
+                      {note.input_content_type || '未设置'}
+                    </p>
+                  </div>
+
+                  {note.input_reference_links && (
+                    <div>
+                      <div className="flex items-center justify-between mb-2">
+                        <label className="text-sm font-medium text-gray-700">参考链接</label>
+                        <CopyButton text={note.input_reference_links} fieldName="reference_links" />
+                      </div>
+                      <p className="text-gray-800 bg-white p-3 rounded border break-all">
+                        {note.input_reference_links}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
