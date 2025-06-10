@@ -14,7 +14,7 @@ class UserOut(BaseModel):
     age: int
 
     class Config:
-        orm_mode = True
+        from_attributes = True
 
 class NoteGenerateRequest(BaseModel):
     basic_content: str  # 基本内容
@@ -61,4 +61,4 @@ class NoteOut(BaseModel):
     updated_at: Optional[datetime]
 
     class Config:
-        orm_mode = True
+        from_attributes = True
