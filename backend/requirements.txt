@@ -1,10 +1,16 @@
-fastapi
-uvicorn[standard]
-pydantic
-pydantic[email]
-sqlalchemy
-psycopg2-binary
-fastapi[all] 
-httpx
-python-dotenv
-datetime 
+# FastAPI 和相关依赖
+fastapi>=0.104.1,<0.105.0
+uvicorn[standard]==0.24.0
+
+# Pydantic - 使用 v1 版本以确保兼容性
+pydantic[email]>=1.10.0,<2.0.0
+
+# 数据库相关
+sqlalchemy>=1.4.0,<2.0.0
+psycopg2-binary==2.9.7
+
+# HTTP 客户端
+httpx>=0.24.0
+
+# 环境变量
+python-dotenv>=0.19.0 
