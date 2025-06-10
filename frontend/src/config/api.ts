@@ -1,20 +1,30 @@
 // API 配置文件
 const getApiUrl = () => {
-  // 检查是否在浏览器环境
-  const isProduction = process.env.NODE_ENV === 'production'
-  
-  if (isProduction) {
-    // 生产环境使用环境变量设置的 API URL
-    return process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+  // 优先使用环境变量设置的 API URL
+  if (process.env.NEXT_PUBLIC_API_URL) {
+    return process.env.NEXT_PUBLIC_API_URL
   }
   
-  // 开发环境
   if (typeof window === 'undefined') {
-    // 服务端渲染时使用 Docker 内部网络地址
+    // 服务端渲染时，优先使用 Docker 内部网络地址
     return 'http://backend:8000'
   }
   
-  // 客户端开发环境使用 localhost
+  // 浏览器环境 - 根据当前页面URL智能判断
+  if (typeof window !== 'undefined') {
+    const currentHost = window.location.hostname
+    
+    // 如果是 localhost 或 127.0.0.1，使用 localhost:8000
+    if (currentHost === 'localhost' || currentHost === '127.0.0.1') {
+      return 'http://localhost:8000'
+    }
+    
+    // 其他情况使用当前host但端口改为8000
+    const protocol = window.location.protocol
+    return `${protocol}//${currentHost}:8000`
+  }
+  
+  // 默认回退
   return 'http://localhost:8000'
 }
 
@@ -34,4 +44,5 @@ export const API_ENDPOINTS = {
   USERS_CREATE: `${API_BASE_URL}/users/`,
 }
 
-console.log('API Base URL:', API_BASE_URL) 
+console.log('API Base URL:', API_BASE_URL)
+console.log('Environment NEXT_PUBLIC_API_URL:', process.env.NEXT_PUBLIC_API_URL) 

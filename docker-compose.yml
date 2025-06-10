@@ -28,8 +28,13 @@ services:
       - /app/node_modules     # 不覆盖容器内 node_modules
     ports:
       - "3000:3000"
+    env_file:
+      - .env
     environment:
-      - NODE_ENV=development
+      - NODE_ENV=${NODE_ENV:-development}
+      - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
+    depends_on:
+      - backend
 
   backend:
     container_name: fastapi-app
