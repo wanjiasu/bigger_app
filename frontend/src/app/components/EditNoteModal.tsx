@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { X, Save, Loader2 } from 'lucide-react'
 import axios from 'axios'
+import { API_ENDPOINTS } from '../../config/api'
 
 interface Note {
   id: number
@@ -49,7 +50,7 @@ export function EditNoteModal({ note, onClose, onSuccess }: EditNoteModalProps) 
     setError('')
 
     try {
-      const response = await axios.put(`http://localhost:8000/notes/${note.id}`, formData)
+      const response = await axios.put(API_ENDPOINTS.NOTES_UPDATE(note.id), formData)
       onSuccess(response.data)
     } catch (err: any) {
       console.error('更新失败:', err)

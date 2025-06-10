@@ -1,6 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { API_ENDPOINTS } from '../../config/api'
 
 type User = {
   id: number
@@ -13,7 +14,7 @@ export default function UsersPage() {
   const [users, setUsers] = useState<User[]>([])
 
   useEffect(() => {
-    fetch('http://localhost:8000/users/')
+    fetch(API_ENDPOINTS.USERS_LIST)
       .then(res => res.json())
       .then(data => setUsers(data))
   }, [])

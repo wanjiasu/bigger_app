@@ -5,6 +5,7 @@ import { Eye, Edit, Trash2, Search, RefreshCw } from 'lucide-react'
 import axios from 'axios'
 import { NoteDetailModal } from './NoteDetailModal'
 import { EditNoteModal } from './EditNoteModal'
+import { API_ENDPOINTS } from '../../config/api'
 
 interface Note {
   id: number
@@ -40,7 +41,7 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
   const fetchNotes = async () => {
     try {
       setLoading(true)
-      const response = await axios.get('http://localhost:8000/notes/')
+      const response = await axios.get(API_ENDPOINTS.NOTES_LIST)
       setNotes(response.data.sort((a: Note, b: Note) => 
         new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
       ))
@@ -61,7 +62,7 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
     if (!confirm('确定要删除这条笔记吗？')) return
 
     try {
-      await axios.delete(`http://localhost:8000/notes/${id}`)
+      await axios.delete(API_ENDPOINTS.NOTES_DELETE(id))
       setNotes(notes.filter(note => note.id !== id))
     } catch (err: any) {
       console.error('删除失败:', err)

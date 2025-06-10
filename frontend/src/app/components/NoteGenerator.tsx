@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Sparkles, Loader2, Send, ChevronDown, Settings, Target, TrendingUp, Users, FileText, Link, Smartphone, Heart, MessageCircle, Share, Bookmark, Check, Copy } from 'lucide-react'
 import axios from 'axios'
+import { API_ENDPOINTS } from '../../config/api'
 
 interface NoteGeneratorProps {
   onNoteGenerated: () => void
@@ -198,7 +199,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
     setGeneratedNote(null)
 
     try {
-      const response = await axios.post('http://localhost:8000/notes/generate', {
+      const response = await axios.post(API_ENDPOINTS.NOTES_GENERATE, {
         basic_content: basicContent.trim(),
         note_purpose: notePurpose.trim() || null,
         recent_trends: recentTrends.trim() || null,
