@@ -4,13 +4,17 @@ from app.db import Base, engine, SessionLocal
 from app.models import User
 from app.schemas import UserCreate
 from fastapi.middleware.cors import CORSMiddleware
+import os
 
 app = FastAPI()
+
+# 从环境变量获取允许的域名
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
 
 # 添加跨域中间件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 生产环境建议改为指定域名
+    allow_origins=allowed_origins,  # 使用环境变量配置的域名
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
