@@ -1,6 +1,6 @@
 # Full Stack Application
 
-一个使用 Next.js + FastAPI + PostgreSQL + NocoDB 的全栈应用。
+一个使用 Next.js + FastAPI + PostgreSQL 的全栈应用。
 
 ## 技术栈
 
@@ -14,7 +14,6 @@
 - FastAPI
 - SQLAlchemy
 - PostgreSQL 15
-- NocoDB (数据库管理工具)
 
 ## 项目结构
 ```tree
@@ -47,8 +46,6 @@ cd my-fullstack-app
 ```bash
 cp .env.example .env
 # 编辑 .env 文件设置您的环境变量
-openssl rand -base64 32
-# 生成 NC_AUTH_JWT_SECRET
 ```
 
 3. 启动服务
@@ -59,20 +56,17 @@ docker-compose up --build
 4. 访问服务
 - 前端: http://localhost:3000
 - 后端 API: http://localhost:8000
-- NocoDB: http://localhost:8080
 
 ## 开发指南
 
 ### 数据库架构
 - PostgreSQL 超级用户用于管理数据库
 - FastAPI 使用独立的数据库用户和数据库
-- NocoDB 使用独立的数据库用户和数据库
 
 ### 环境变量
 请参考 `.env.example` 文件进行配置：
 - 数据库配置
 - API 配置
-- NocoDB 配置
 
 ## 部署
 

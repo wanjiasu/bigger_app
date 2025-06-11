@@ -48,20 +48,7 @@ services:
       db:
         condition: service_healthy  # 等待数据库健康检查通过
     restart: unless-stopped        # 添加重启策略
-  nocodb:
-    container_name: nocodb
-    image: nocodb/nocodb:latest
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    environment:
-      NC_DB: ${NOCO_DB_URL}
-      NC_AUTH_JWT_SECRET: ${NC_AUTH_JWT_SECRET}
-    volumes:
-      - nocodb_data:/usr/app/data
 
 volumes:
   postgres_data:
-  nocodb_data:
 
