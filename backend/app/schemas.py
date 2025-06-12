@@ -12,18 +12,20 @@ class UserOut(BaseModel):
     username: str
     email: str
     age: int
+    created_at: datetime
 
     class Config:
         from_attributes = True
 
 class NoteGenerateRequest(BaseModel):
-    basic_content: str  # 基本内容
-    note_purpose: Optional[str] = None  # 笔记目的
-    recent_trends: Optional[str] = None  # 近期热梗
-    writing_style: Optional[str] = None  # 写作风格
-    target_audience: Optional[str] = None  # 内容受众
-    content_type: Optional[str] = None  # 内容类型
-    reference_links: Optional[str] = None  # 参考链接
+    basic_content: str
+    note_purpose: Optional[str] = None
+    recent_trends: Optional[str] = None
+    writing_style: Optional[str] = None
+    target_audience: Optional[str] = None
+    content_type: Optional[str] = None
+    reference_links: Optional[str] = None
+    ai_model: Optional[str] = None  # 新增AI模型选择字段
 
 class NoteCreate(BaseModel):
     input_basic_content: str
@@ -47,18 +49,17 @@ class NoteUpdate(BaseModel):
 class NoteOut(BaseModel):
     id: int
     input_basic_content: str
-    input_note_purpose: Optional[str]
-    input_recent_trends: Optional[str]
-    input_writing_style: Optional[str]
-    input_target_audience: Optional[str]
-    input_content_type: Optional[str]
-    input_reference_links: Optional[str]
+    input_note_purpose: Optional[str] = None
+    input_recent_trends: Optional[str] = None
+    input_writing_style: Optional[str] = None
+    input_target_audience: Optional[str] = None
+    input_content_type: Optional[str] = None
+    input_reference_links: Optional[str] = None
     note_title: str
     note_content: str
     comment_guide: str
     comment_questions: str
     created_at: datetime
-    updated_at: Optional[datetime]
 
     class Config:
         from_attributes = True

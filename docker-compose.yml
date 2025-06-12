@@ -11,11 +11,71 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./db/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
-    healthcheck:                   # 添加健康检查
+    healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres_admin -d postgres"]
       interval: 5s
       timeout: 5s
       retries: 5
+      start_period: 10s
+    networks:
+      - app-network
+
+  mysql:
+    image: mysql/mysql-server:8.0
+    platform: linux/amd64
+    container_name: mysql-local
+    restart: always
+    env_file:
+      - .env
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-root123}
+      MYSQL_ROOT_HOST: "%"  # 允许root从任何主机连接
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-oneapi}
+      MYSQL_USER: ${MYSQL_USER:-user}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-password123}
+      TZ: Asia/Shanghai
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./mysql/init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    command: 
+      - --default-authentication-plugin=mysql_native_password
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
+      - --bind-address=0.0.0.0
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD}"]
+      timeout: 20s
+      retries: 10
+
+  one-api:
+    image: ghcr.io/songquanpeng/one-api:latest
+    platform: linux/amd64
+    container_name: one-api
+    restart: always
+    depends_on:
+      mysql:
+        condition: service_healthy
+    ports:
+      - "3000:3000"
+    volumes:
+      - one_api_data:/data
+    environment:
+      - SQL_DSN=root:${MYSQL_ROOT_PASSWORD:-root123}@tcp(mysql:3306)/oneapi?charset=utf8mb4&parseTime=True&loc=Local
+      - SESSION_SECRET=${SESSION_SECRET:-random_session_secret_12345}
+      - REDIS_CONN_STRING=${REDIS_CONN_STRING:-""}
+      - NODE_ENV=${NODE_ENV:-development}
+      - TZ=Asia/Shanghai
+    networks:
+      - app-network
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/status"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
       start_period: 10s
 
   frontend:
@@ -24,10 +84,10 @@ services:
       context: ./frontend
       dockerfile: Dockerfile.dev
     volumes:
-      - ./frontend:/app       # 映射代码目录（实现热更新）
-      - /app/node_modules     # 不覆盖容器内 node_modules
+      - ./frontend:/app
+      - /app/node_modules
     ports:
-      - "3000:3000"
+      - "3001:3000"
     env_file:
       - .env
     environment:
@@ -35,6 +95,8 @@ services:
       - NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL:-http://localhost:8000}
     depends_on:
       - backend
+    networks:
+      - app-network
 
   backend:
     container_name: fastapi-app
@@ -49,24 +111,26 @@ services:
       - .env
     environment:
       - FASTAPI_DB_URL=postgresql://fp_user:fp_pass@db:5432/fp_db
+      - ONE_API_URL=http://one-api:3000
+      - ONE_API_KEY=${ONE_API_KEY}
+      - GPT4_CHANNEL_ID=${GPT4_CHANNEL_ID:-1}
+      - DEEPSEEK_CHANNEL_ID=${DEEPSEEK_CHANNEL_ID:-2}
+      - CLAUDE_CHANNEL_ID=${CLAUDE_CHANNEL_ID:-3}
     depends_on:
       db:
-        condition: service_healthy  # 等待数据库健康检查通过
-    restart: unless-stopped        # 添加重启策略
-  nocodb:
-    container_name: nocodb
-    image: nocodb/nocodb:latest
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    environment:
-      NC_DB: ${NOCO_DB_URL}
-      NC_AUTH_JWT_SECRET: ${NC_AUTH_JWT_SECRET}
-    volumes:
-      - nocodb_data:/usr/app/data
+        condition: service_healthy
+      one-api:
+        condition: service_healthy
+    restart: unless-stopped
+    networks:
+      - app-network
 
 volumes:
   postgres_data:
-  nocodb_data:
+  mysql_data:
+  one_api_data:
+
+networks:
+  app-network:
+    driver: bridge
 

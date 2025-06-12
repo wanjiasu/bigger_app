@@ -1,0 +1,36 @@
+-- 创建数据库（如果不存在）
+CREATE DATABASE IF NOT EXISTS oneapi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 确保root用户有正确的权限
+ALTER USER 'root'@'%' IDENTIFIED WITH mysql_native_password BY 'root123';
+GRANT ALL PRIVILEGES ON *.* TO 'root'@'%' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
+
+-- 使用oneapi数据库
+USE oneapi;
+
+-- 创建必要的表（如果one-api没有自动创建的话）
+CREATE TABLE IF NOT EXISTS users (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    username VARCHAR(255) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    display_name VARCHAR(255),
+    role INTEGER NOT NULL DEFAULT 1,
+    status INTEGER NOT NULL DEFAULT 1,
+    email VARCHAR(255),
+    quota INTEGER NOT NULL DEFAULT 0,
+    used_quota INTEGER NOT NULL DEFAULT 0,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME
+);
+
+CREATE TABLE IF NOT EXISTS channels (
+    id BIGINT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(255) NOT NULL,
+    type INTEGER NOT NULL DEFAULT 1,
+    key VARCHAR(255) NOT NULL,
+    status INTEGER NOT NULL DEFAULT 1,
+    weight INTEGER NOT NULL DEFAULT 1,
+    created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    deleted_at DATETIME
+); 
