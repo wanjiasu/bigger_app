@@ -66,17 +66,20 @@ services:
     environment:
       - SQL_DSN=root:${MYSQL_ROOT_PASSWORD:-root123}@tcp(mysql:3306)/oneapi?charset=utf8mb4&parseTime=True&loc=Local
       - SESSION_SECRET=${SESSION_SECRET:-random_session_secret_12345}
+      - ROOT_PASSWORD=${ONE_API_ROOT_PASSWORD:-123456}
       - REDIS_CONN_STRING=${REDIS_CONN_STRING:-""}
       - NODE_ENV=${NODE_ENV:-development}
       - TZ=Asia/Shanghai
+      - TIKTOKEN_CACHE_DIR=/data/tiktoken
+      - DISABLE_GPTJ_TOKENIZER=true
     networks:
       - app-network
     healthcheck:
-      test: ["CMD", "wget", "-q", "--spider", "http://localhost:3000/api/status"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 10s
+      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/status || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 120s
 
   frontend:
     container_name: nextjs-app
