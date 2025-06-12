@@ -18,10 +18,25 @@ CREATE TABLE IF NOT EXISTS users (
     role INTEGER NOT NULL DEFAULT 1,
     status INTEGER NOT NULL DEFAULT 1,
     email VARCHAR(255),
-    quota INTEGER NOT NULL DEFAULT 0,
-    used_quota INTEGER NOT NULL DEFAULT 0,
+    github_id VARCHAR(255),
+    wechat_id VARCHAR(255),
+    lark_id VARCHAR(255),
+    oidc_id VARCHAR(255),
+    access_token VARCHAR(255),
+    quota BIGINT NOT NULL DEFAULT 0,
+    used_quota BIGINT NOT NULL DEFAULT 0,
+    request_count BIGINT NOT NULL DEFAULT 0,
+    `group` VARCHAR(255) NOT NULL DEFAULT 'default',
+    aff_code VARCHAR(255),
+    inviter_id BIGINT NOT NULL DEFAULT 0,
     created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    deleted_at DATETIME
+    deleted_at DATETIME,
+    UNIQUE KEY `idx_username` (`username`),
+    UNIQUE KEY `idx_github_id` (`github_id`),
+    UNIQUE KEY `idx_wechat_id` (`wechat_id`),
+    UNIQUE KEY `idx_lark_id` (`lark_id`),
+    UNIQUE KEY `idx_oidc_id` (`oidc_id`),
+    UNIQUE KEY `idx_access_token` (`access_token`)
 );
 
 CREATE TABLE IF NOT EXISTS channels (
