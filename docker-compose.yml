@@ -72,14 +72,9 @@ services:
       - TZ=Asia/Shanghai
       - TIKTOKEN_CACHE_DIR=/data/tiktoken
       - DISABLE_GPTJ_TOKENIZER=true
+      - LOG_LEVEL=debug
     networks:
       - app-network
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:3000/api/status || exit 1"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 120s
 
   frontend:
     container_name: nextjs-app
@@ -123,7 +118,7 @@ services:
       db:
         condition: service_healthy
       one-api:
-        condition: service_healthy
+        condition: service_started
     restart: unless-stopped
     networks:
       - app-network
