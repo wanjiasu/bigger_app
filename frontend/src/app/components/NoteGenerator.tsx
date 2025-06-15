@@ -1,7 +1,7 @@
 'use client'
 
-import { useState } from 'react'
-import { Sparkles, Loader2, Send, ChevronDown, Settings, Target, TrendingUp, Users, FileText, Link, Smartphone, Heart, MessageCircle, Share, Bookmark, Check, Copy, Cpu } from 'lucide-react'
+import { useState, useRef, useEffect } from 'react'
+import { Sparkles, Loader2, Send, ChevronDown, Settings, Target, TrendingUp, Users, FileText, Link, Smartphone, Heart, MessageCircle, Share, Bookmark, Check, Copy, Cpu, X } from 'lucide-react'
 import axios from 'axios'
 import { API_ENDPOINTS } from '../../config/api'
 
@@ -197,6 +197,24 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
   const [copyError, setCopyError] = useState<string | null>(null)
   const [copyingContent, setCopyingContent] = useState<string | null>(null)
   const [allContentCopied, setAllContentCopied] = useState(false)
+  
+  // 多选下拉状态
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false)
+  const modelDropdownRef = useRef<HTMLDivElement>(null)
+
+  // 点击外部关闭下拉
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(event.target as Node)) {
+        setIsModelDropdownOpen(false)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [])
 
   // 可用的模型列表
   const availableModels = [
@@ -775,43 +793,122 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                       已选择 {selectedModels.length}/3 个模型
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
-                    {availableModels.map((model) => (
-                      <label 
-                        key={model.value} 
-                        className={`relative flex items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
-                          selectedModels.includes(model.value)
-                            ? 'border-orange-500 bg-orange-50 text-orange-700'
-                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
-                        }`}
-                      >
-                        <input
-                          type="checkbox"
-                          checked={selectedModels.includes(model.value)}
-                          onChange={(e) => {
-                            if (e.target.checked) {
-                              if (selectedModels.length < 3) {
-                                setSelectedModels([...selectedModels, model.value])
-                              }
-                            } else {
-                              setSelectedModels(selectedModels.filter(m => m !== model.value))
-                            }
-                          }}
-                          className="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500"
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="text-sm font-medium truncate">{model.label}</div>
-                          {model.value === 'gpt-4o' && (
-                            <div className="text-xs text-orange-500">推荐</div>
+                  
+                  {/* 多选下拉组件 */}
+                  <div className="relative" ref={modelDropdownRef}>
+                    <button
+                      type="button"
+                      onClick={() => setIsModelDropdownOpen(!isModelDropdownOpen)}
+                      className="w-full px-4 py-3 text-left bg-white border border-gray-200 rounded-lg hover:border-gray-300 focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200"
+                    >
+                      <div className="flex items-center justify-between">
+                        <div className="flex-1">
+                          {selectedModels.length === 0 ? (
+                            <span className="text-gray-500">请选择AI模型...</span>
+                          ) : (
+                            <div className="flex flex-wrap gap-1">
+                              {selectedModels.map((modelValue) => {
+                                const model = availableModels.find(m => m.value === modelValue)
+                                return (
+                                  <span
+                                    key={modelValue}
+                                    className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full"
+                                  >
+                                    {model?.label}
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation()
+                                        setSelectedModels(selectedModels.filter(m => m !== modelValue))
+                                      }}
+                                      className="hover:bg-orange-200 rounded-full p-0.5 transition-colors"
+                                    >
+                                      <X className="w-3 h-3" />
+                                    </button>
+                                  </span>
+                                )
+                              })}
+                            </div>
                           )}
                         </div>
-                      </label>
-                    ))}
+                        <ChevronDown 
+                          className={`w-5 h-5 text-gray-400 transition-transform ${
+                            isModelDropdownOpen ? 'rotate-180' : ''
+                          }`} 
+                        />
+                      </div>
+                    </button>
+
+                    {/* 下拉选项 */}
+                    {isModelDropdownOpen && (
+                      <div className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-lg shadow-lg max-h-60 overflow-y-auto">
+                        <div className="p-2">
+                          {availableModels.map((model) => {
+                            const isSelected = selectedModels.includes(model.value)
+                            const isDisabled = !isSelected && selectedModels.length >= 3
+                            
+                            return (
+                              <label
+                                key={model.value}
+                                className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer transition-all duration-200 ${
+                                  isDisabled 
+                                    ? 'opacity-50 cursor-not-allowed' 
+                                    : 'hover:bg-gray-50'
+                                } ${
+                                  isSelected ? 'bg-orange-50 border border-orange-200' : ''
+                                }`}
+                              >
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  disabled={isDisabled}
+                                  onChange={(e) => {
+                                    if (e.target.checked) {
+                                      if (selectedModels.length < 3) {
+                                        setSelectedModels([...selectedModels, model.value])
+                                      }
+                                    } else {
+                                      setSelectedModels(selectedModels.filter(m => m !== model.value))
+                                    }
+                                  }}
+                                  className="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500 disabled:opacity-50"
+                                />
+                                <div className="flex-1">
+                                  <div className={`text-sm font-medium ${isSelected ? 'text-orange-700' : 'text-gray-800'}`}>
+                                    {model.label}
+                                  </div>
+                                  {model.value === 'gpt-4o' && (
+                                    <div className="text-xs text-orange-500 mt-0.5">推荐使用</div>
+                                  )}
+                                  {model.value === 'claude-sonnet-4-20250514' && (
+                                    <div className="text-xs text-purple-500 mt-0.5">最新模型</div>
+                                  )}
+                                </div>
+                                {isSelected && (
+                                  <Check className="w-4 h-4 text-orange-500" />
+                                )}
+                              </label>
+                            )
+                          })}
+                        </div>
+                        
+                        {selectedModels.length >= 3 && (
+                          <div className="border-t border-gray-100 p-3 bg-orange-50">
+                            <div className="flex items-center gap-2">
+                              <span className="text-orange-500">⚠️</span>
+                              <p className="text-xs text-orange-600">已达到最大选择数量（3个模型）</p>
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    )}
                   </div>
-                  {selectedModels.length >= 3 && (
-                    <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg">
-                      <span className="text-orange-500">⚠️</span>
-                      <p className="text-sm text-orange-600">已达到最大选择数量，多模型对比可获得更好的效果</p>
+                  
+                  {/* 选择提示 */}
+                  {selectedModels.length === 0 && (
+                    <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
+                      <span className="text-blue-500">💡</span>
+                      <p className="text-sm text-blue-600">建议选择1-3个模型进行对比，获得更好的生成效果</p>
                     </div>
                   )}
                 </div>
