@@ -196,6 +196,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
   const [copiedContent, setCopiedContent] = useState<string | null>(null)
   const [copyError, setCopyError] = useState<string | null>(null)
   const [copyingContent, setCopyingContent] = useState<string | null>(null)
+  const [allContentCopied, setAllContentCopied] = useState(false)
 
   // 可用的模型列表
   const availableModels = [
@@ -247,6 +248,61 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
       setTimeout(() => setCopyError(null), 3000)
     } finally {
       setCopyingContent(null) // 清除复制中状态
+    }
+  }
+
+  const copyAllContent = async (content: string) => {
+    try {
+      setCopyError(null)
+      setAllContentCopied(false)
+      setCopyingContent('ALL_CONTENT') // 特殊标识符
+      
+      // 优先使用现代 Clipboard API
+      if (navigator?.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(content)
+      } else {
+        // 降级方案
+        const textArea = document.createElement('textarea')
+        textArea.value = content
+        textArea.style.position = 'fixed'
+        textArea.style.left = '-999999px'
+        textArea.style.top = '-999999px'
+        textArea.style.opacity = '0'
+        textArea.setAttribute('readonly', '')
+        document.body.appendChild(textArea)
+        
+        textArea.select()
+        textArea.setSelectionRange(0, 99999)
+        
+        const success = document.execCommand('copy')
+        document.body.removeChild(textArea)
+        
+        if (!success) {
+          throw new Error('复制操作失败')
+        }
+      }
+      
+      // 成功复制后的反馈
+      setAllContentCopied(true)
+      setCopiedContent(content)
+      
+      // 设备振动反馈（如果支持）
+      if (navigator.vibrate) {
+        navigator.vibrate(100) // 振动100毫秒
+      }
+      
+      // 重置状态
+      setTimeout(() => {
+        setAllContentCopied(false)
+        setCopiedContent(null)
+      }, 3000) // 延长显示时间为3秒
+      
+    } catch (err) {
+      console.error('复制失败:', err)
+      setCopyError('复制失败，请手动选择并复制内容')
+      setTimeout(() => setCopyError(null), 3000)
+    } finally {
+      setCopyingContent(null)
     }
   }
 
@@ -398,13 +454,33 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                         const note = generatedNotes[actualModels[0]]
                         if (note) {
                           const allContent = `${note.note_title}\n\n${note.note_content}\n\n评论引导：\n${note.comment_guide}\n\n评论问题：\n${note.comment_questions}`
-                          copyToClipboard(allContent)
+                          copyAllContent(allContent)
                         }
                       }}
-                      className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center gap-2"
+                      className={`w-full px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                        copyingContent === 'ALL_CONTENT'
+                          ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                          : allContentCopied
+                          ? 'bg-green-500 hover:bg-green-600 text-white'
+                          : 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white'
+                      }`}
                     >
-                      <Copy className="w-4 h-4" />
-                      复制全部内容
+                      {copyingContent === 'ALL_CONTENT' ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          复制中...
+                        </>
+                      ) : allContentCopied ? (
+                        <>
+                          <Check className="w-4 h-4" />
+                          复制成功！
+                        </>
+                      ) : (
+                        <>
+                          <Copy className="w-4 h-4" />
+                          复制全部内容
+                        </>
+                      )}
                     </button>
                   </>
                 )}
@@ -498,17 +574,25 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                         }
                         return ''
                       }).join('\n')
-                      copyToClipboard(allContent)
+                      copyAllContent(allContent)
                     }}
-                    className="w-full bg-gradient-to-r from-pink-500 to-purple-600 text-white px-4 py-2 rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 transition-all duration-200 flex items-center justify-center gap-2"
+                    className={`w-full px-4 py-2 rounded-lg font-medium transition-all duration-200 flex items-center justify-center gap-2 ${
+                      copyingContent === 'ALL_CONTENT'
+                        ? 'bg-blue-500 hover:bg-blue-600 text-white'
+                        : allContentCopied
+                        ? 'bg-green-500 hover:bg-green-600 text-white'
+                        : 'bg-gradient-to-r from-pink-500 to-purple-600 hover:from-pink-600 hover:to-purple-700 text-white'
+                    }`}
                   >
-                    {copiedContent && actualModels.every((model) => 
-                      copiedContent.includes(generatedNotes[model]?.note_title || '') && 
-                      copiedContent.includes(generatedNotes[model]?.comment_guide || '')
-                    ) ? (
+                    {copyingContent === 'ALL_CONTENT' ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        复制中...
+                      </>
+                    ) : allContentCopied ? (
                       <>
                         <Check className="w-4 h-4" />
-                        已复制所有内容
+                        复制成功！({actualModels.length} 个模型)
                       </>
                     ) : (
                       <>
@@ -765,6 +849,15 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
             <div className="flex items-center gap-2">
               <span className="text-orange-500">⚠️</span>
               <p className="text-orange-600">{copyError}</p>
+            </div>
+          </div>
+        )}
+
+        {allContentCopied && (
+          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2">
+              <Check className="w-5 h-5 text-green-500" />
+              <p className="text-green-600 font-medium">内容已成功复制到剪贴板！</p>
             </div>
           </div>
         )}
