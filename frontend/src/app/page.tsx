@@ -6,7 +6,7 @@ import { NotesTable } from './components/NotesTable'
 import { FileText, Sparkles, BarChart3, Users, Settings, HelpCircle, Shield, TrendingUp } from 'lucide-react'
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'generate' | 'manage'>('generate')
+  const [activeTab, setActiveTab] = useState<'generate' | 'manage' | 'history'>('generate')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   const handleNoteGenerated = () => {
@@ -16,6 +16,7 @@ export default function Home() {
   const sidebarItems = [
     { id: 'account', label: '账号管理', icon: Users, active: false, disabled: true },
     { id: 'generate', label: '内容生成', icon: Sparkles, active: activeTab === 'generate' },
+    { id: 'history', label: '历史记录', icon: FileText, active: activeTab === 'history' },
     { id: 'violation', label: '违规检测', icon: Shield, active: false, disabled: true },
     { id: 'tracking', label: '数据追踪', icon: TrendingUp, active: false, disabled: true },
   ]
@@ -50,7 +51,7 @@ export default function Home() {
             {sidebarItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => !item.disabled && item.id === 'generate' && setActiveTab(item.id as 'generate' | 'manage')}
+                onClick={() => !item.disabled && (item.id === 'generate' || item.id === 'history') && setActiveTab(item.id as 'generate' | 'manage' | 'history')}
                 disabled={item.disabled}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 relative ${
                   item.active
@@ -99,11 +100,18 @@ export default function Home() {
           <div className="flex items-center justify-between">
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
-                {activeTab === 'generate' ? '内容生成' : '管理笔记'}
+                {activeTab === 'generate' 
+                  ? '内容生成' 
+                  : activeTab === 'history' 
+                  ? '历史记录' 
+                  : '管理笔记'
+                }
               </h2>
               <p className="text-gray-600 mt-1">
                 {activeTab === 'generate' 
                   ? '基于 DeepSeek AI 的智能小红书图文笔记生成工具' 
+                  : activeTab === 'history'
+                  ? '查看所有历史生成记录，包含详细参数和生成结果'
                   : '查看和管理已生成的笔记内容'
                 }
               </p>
@@ -119,8 +127,10 @@ export default function Home() {
           <div className="max-w-6xl mx-auto">
             {activeTab === 'generate' ? (
               <NoteGenerator onNoteGenerated={handleNoteGenerated} />
+            ) : activeTab === 'history' ? (
+              <NotesTable refreshTrigger={refreshTrigger} showDetailed={true} />
             ) : (
-              <NotesTable refreshTrigger={refreshTrigger} />
+              <NotesTable refreshTrigger={refreshTrigger} showDetailed={false} />
             )}
           </div>
         </div>

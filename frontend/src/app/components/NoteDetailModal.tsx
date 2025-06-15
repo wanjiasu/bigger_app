@@ -23,9 +23,10 @@ interface Note {
 interface NoteDetailModalProps {
   note: Note
   onClose: () => void
+  showDetailed?: boolean
 }
 
-export function NoteDetailModal({ note, onClose }: NoteDetailModalProps) {
+export function NoteDetailModal({ note, onClose, showDetailed = false }: NoteDetailModalProps) {
   const [copiedField, setCopiedField] = useState<string | null>(null)
 
   const copyToClipboard = async (text: string, fieldName: string) => {
@@ -57,7 +58,16 @@ export function NoteDetailModal({ note, onClose }: NoteDetailModalProps) {
       <div className="bg-white rounded-xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-hidden">
         {/* Header */}
         <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-2xl font-bold text-gray-800">笔记详情</h2>
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold text-gray-800">
+              {showDetailed ? '历史记录详情' : '笔记详情'}
+            </h2>
+            {showDetailed && (
+              <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white px-3 py-1 rounded-full text-sm font-mono">
+                ID: #{note.id}
+              </div>
+            )}
+          </div>
           <button
             onClick={onClose}
             className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
@@ -71,7 +81,17 @@ export function NoteDetailModal({ note, onClose }: NoteDetailModalProps) {
           <div className="space-y-6">
             {/* Input Information */}
             <div className="bg-gray-50 rounded-lg p-6">
-              <h3 className="text-lg font-semibold text-gray-800 mb-4">输入信息</h3>
+              <div className="flex items-center justify-between mb-4">
+                <h3 className="text-lg font-semibold text-gray-800">输入信息</h3>
+                {showDetailed && (
+                  <div className="text-sm text-gray-500 space-y-1">
+                    <div>创建时间: {new Date(note.created_at).toLocaleString('zh-CN')}</div>
+                    {note.updated_at && (
+                      <div>更新时间: {new Date(note.updated_at).toLocaleString('zh-CN')}</div>
+                    )}
+                  </div>
+                )}
+              </div>
               <div className="space-y-4">
                 <div>
                   <div className="flex items-center justify-between mb-2">

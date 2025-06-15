@@ -26,9 +26,10 @@ interface Note {
 
 interface NotesTableProps {
   refreshTrigger: number
+  showDetailed?: boolean
 }
 
-export function NotesTable({ refreshTrigger }: NotesTableProps) {
+export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableProps) {
   const [notes, setNotes] = useState<Note[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
@@ -131,7 +132,9 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
   return (
     <div className="bg-white rounded-xl shadow-lg p-8">
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">笔记管理</h2>
+        <h2 className="text-2xl font-bold text-gray-800">
+          {showDetailed ? '历史记录详情' : '笔记管理'}
+        </h2>
         <div className="flex items-center gap-4">
           <div className="relative">
             <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
@@ -164,11 +167,23 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
           <table className="w-full">
             <thead>
               <tr className="border-b border-gray-200">
+                {showDetailed && (
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">ID</th>
+                )}
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">标题</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">基本内容</th>
+                {showDetailed && (
+                  <>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">笔记目的</th>
+                    <th className="text-left py-3 px-4 font-semibold text-gray-700">近期热梗</th>
+                  </>
+                )}
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">内容类型</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">目标受众</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">写作风格</th>
+                {showDetailed && (
+                  <th className="text-left py-3 px-4 font-semibold text-gray-700">参考链接</th>
+                )}
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">创建时间</th>
                 <th className="text-left py-3 px-4 font-semibold text-gray-700">操作</th>
               </tr>
@@ -176,31 +191,71 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
             <tbody>
               {filteredNotes.map((note) => (
                 <tr key={note.id} className="border-b border-gray-100 hover:bg-gray-50">
+                  {showDetailed && (
+                    <td className="py-4 px-4">
+                      <div className="font-mono text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                        #{note.id}
+                      </div>
+                    </td>
+                  )}
                   <td className="py-4 px-4">
                     <div className="font-medium text-gray-800">
-                      {truncateText(note.note_title, 30)}
+                      {truncateText(note.note_title, showDetailed ? 25 : 30)}
                     </div>
                   </td>
                   <td className="py-4 px-4">
                     <div className="text-gray-600">
-                      {truncateText(note.input_basic_content, 40)}
+                      {truncateText(note.input_basic_content, showDetailed ? 30 : 40)}
+                    </div>
+                  </td>
+                  {showDetailed && (
+                    <>
+                      <td className="py-4 px-4">
+                        <div className="text-gray-600">
+                          {truncateText(note.input_note_purpose, 15)}
+                        </div>
+                      </td>
+                      <td className="py-4 px-4">
+                        <div className="text-gray-600">
+                          {truncateText(note.input_recent_trends, 15)}
+                        </div>
+                      </td>
+                    </>
+                  )}
+                  <td className="py-4 px-4">
+                    <div className="text-gray-600">
+                      {truncateText(note.input_content_type, 15)}
                     </div>
                   </td>
                   <td className="py-4 px-4">
                     <div className="text-gray-600">
-                      {truncateText(note.input_content_type, 20)}
+                      {truncateText(note.input_target_audience, 15)}
                     </div>
                   </td>
                   <td className="py-4 px-4">
                     <div className="text-gray-600">
-                      {truncateText(note.input_target_audience, 20)}
+                      {truncateText(note.input_writing_style, 15)}
                     </div>
                   </td>
-                  <td className="py-4 px-4">
-                    <div className="text-gray-600">
-                      {truncateText(note.input_writing_style, 20)}
-                    </div>
-                  </td>
+                  {showDetailed && (
+                    <td className="py-4 px-4">
+                      <div className="text-gray-600">
+                        {note.input_reference_links ? (
+                          <a 
+                            href={note.input_reference_links} 
+                            target="_blank" 
+                            rel="noopener noreferrer"
+                            className="text-blue-600 hover:underline"
+                            title={note.input_reference_links}
+                          >
+                            链接
+                          </a>
+                        ) : (
+                          '-'
+                        )}
+                      </div>
+                    </td>
+                  )}
                   <td className="py-4 px-4">
                     <div className="text-gray-600 text-sm">
                       {new Date(note.created_at).toLocaleString('zh-CN')}
@@ -215,20 +270,24 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
                       >
                         <Eye className="w-4 h-4" />
                       </button>
-                      <button
-                        onClick={() => handleEdit(note)}
-                        className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
-                        title="编辑"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </button>
-                      <button
-                        onClick={() => handleDelete(note.id)}
-                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                        title="删除"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
+                      {!showDetailed && (
+                        <>
+                          <button
+                            onClick={() => handleEdit(note)}
+                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            title="编辑"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => handleDelete(note.id)}
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            title="删除"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </>
+                      )}
                     </div>
                   </td>
                 </tr>
@@ -238,14 +297,26 @@ export function NotesTable({ refreshTrigger }: NotesTableProps) {
         </div>
       )}
 
-      <div className="mt-6 text-sm text-gray-500">
-        共 {filteredNotes.length} 条笔记
+      <div className="mt-6 flex items-center justify-between">
+        <div className="text-sm text-gray-500">
+          共 {filteredNotes.length} 条笔记
+        </div>
+        {showDetailed && (
+          <div className="flex items-center gap-4 text-sm text-gray-500">
+            <span>总记录数: {notes.length}</span>
+            <span>搜索结果: {filteredNotes.length}</span>
+            {notes.length > 0 && (
+              <span>最近生成: {new Date(notes[0].created_at).toLocaleDateString('zh-CN')}</span>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Modals */}
       {showDetailModal && selectedNote && (
         <NoteDetailModal
           note={selectedNote}
+          showDetailed={showDetailed}
           onClose={() => {
             setShowDetailModal(false)
             setSelectedNote(null)
