@@ -167,7 +167,7 @@ function XiaohongshuPreview({ note, copiedContent, copyToClipboard }: {
 
 export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
   const [basicContent, setBasicContent] = useState('')
-  const [showAdvanced, setShowAdvanced] = useState(false)
+  const [showAdvanced, setShowAdvanced] = useState(true)
   
   // 高级参数
   const [notePurpose, setNotePurpose] = useState('')
@@ -264,7 +264,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
     setSelectedModels(['gpt-4o']) // 重置为默认模型
     setGeneratedNotes({})
     setError('')
-    setShowAdvanced(false)
+    setShowAdvanced(true)
     setShowResults(false) // 返回输入页面
   }
 

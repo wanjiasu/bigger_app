@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react'
 import { NoteGenerator } from './components/NoteGenerator'
 import { NotesTable } from './components/NotesTable'
-import { FileText, Sparkles, Home, BarChart3, Users, Settings, HelpCircle, Shield, TrendingUp } from 'lucide-react'
+import { FileText, Sparkles, BarChart3, Users, Settings, HelpCircle, Shield, TrendingUp } from 'lucide-react'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'generate' | 'manage'>('generate')
