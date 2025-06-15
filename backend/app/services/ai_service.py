@@ -175,22 +175,57 @@ class AIService:
                 import json
                 import re
                 
-                # 查找JSON块
-                json_match = re.search(r'\{[^{}]*"note_title"[^{}]*\}', content, re.DOTALL)
-                if json_match:
-                    json_str = json_match.group()
-                    parsed_content = json.loads(json_str)
+                print(f"🔍 原始AI响应内容: {content[:200]}...")
+                
+                # 方法1: 尝试直接解析整个内容为JSON
+                try:
+                    parsed_content = json.loads(content.strip())
+                    if isinstance(parsed_content, dict) and 'note_title' in parsed_content:
+                        print(f"✨ 直接JSON解析成功！")
+                        print(f"📌 标题: {parsed_content.get('note_title', '')}")
+                        return parsed_content
+                except json.JSONDecodeError:
+                    pass
+                
+                # 方法2: 查找JSON代码块（```json 或 ```）
+                json_block_patterns = [
+                    r'```json\s*(\{.*?\})\s*```',
+                    r'```\s*(\{.*?\})\s*```',
+                    r'(\{[^{}]*"note_title"[^{}]*\})'
+                ]
+                
+                for pattern in json_block_patterns:
+                    json_matches = re.findall(pattern, content, re.DOTALL | re.IGNORECASE)
+                    for json_match in json_matches:
+                        try:
+                            parsed_content = json.loads(json_match.strip())
+                            if isinstance(parsed_content, dict) and 'note_title' in parsed_content:
+                                print(f"✨ JSON代码块解析成功！")
+                                print(f"📌 标题: {parsed_content.get('note_title', '')}")
+                                return parsed_content
+                        except json.JSONDecodeError:
+                            continue
+                
+                # 方法3: 查找更复杂的JSON结构（支持嵌套）
+                json_pattern = r'\{(?:[^{}]|{[^{}]*})*\}'
+                json_matches = re.findall(json_pattern, content, re.DOTALL)
+                
+                for json_match in json_matches:
+                    try:
+                        parsed_content = json.loads(json_match)
+                        if isinstance(parsed_content, dict) and 'note_title' in parsed_content:
+                            print(f"✨ 复杂JSON结构解析成功！")
+                            print(f"📌 标题: {parsed_content.get('note_title', '')}")
+                            return parsed_content
+                    except json.JSONDecodeError:
+                        continue
+                
+                # 如果所有JSON解析都失败，使用备用解析方法
+                print("⚠️ JSON解析失败，使用备用解析方法")
+                return self._parse_fallback_content(content)
                     
-                    print(f"✨ 笔记生成完成！")
-                    print(f"📌 标题: {parsed_content.get('note_title', '')}")
-                    
-                    return parsed_content
-                else:
-                    # 如果找不到JSON，使用备用解析方法
-                    return self._parse_fallback_content(content)
-                    
-            except json.JSONDecodeError:
-                # 如果JSON解析失败，使用备用解析方法
+            except Exception as e:
+                print(f"⚠️ JSON解析异常: {str(e)}，使用备用解析方法")
                 return self._parse_fallback_content(content)
             
         except Exception as e:
@@ -200,29 +235,59 @@ class AIService:
     def _parse_fallback_content(self, content: str) -> Dict[str, str]:
         """备用内容解析方法"""
         print("🔄 使用备用解析方法...")
+        print(f"🔍 备用解析内容: {content[:300]}...")
         
-        # 简单的内容解析
-        sections = content.split('\n\n')
+        # 初始化默认值
         note = {
             'note_title': '✨ 精彩内容分享',
-            'note_content': content[:500] + '...' if len(content) > 500 else content,
+            'note_content': '',
             'comment_guide': '你们觉得怎么样？评论区聊聊吧！💕',
             'comment_questions': '你有什么看法？\n还想了解什么？\n有类似经历吗？'
         }
         
-        # 尝试提取更好的内容
+        # 如果内容看起来像是不完整的JSON，尝试提取字段值
+        import re
+        
+        # 尝试提取JSON字段值
+        title_match = re.search(r'"note_title":\s*"([^"]*)"', content, re.DOTALL)
+        if title_match:
+            note['note_title'] = title_match.group(1).strip()
+            print(f"📌 提取到标题: {note['note_title']}")
+        
+        content_match = re.search(r'"note_content":\s*"([^"]*)"', content, re.DOTALL)
+        if content_match:
+            note['note_content'] = content_match.group(1).strip()
+            print(f"📝 提取到正文: {note['note_content'][:100]}...")
+        
+        guide_match = re.search(r'"comment_guide":\s*"([^"]*)"', content, re.DOTALL)
+        if guide_match:
+            note['comment_guide'] = guide_match.group(1).strip()
+            print(f"💬 提取到评论引导: {note['comment_guide']}")
+        
+        questions_match = re.search(r'"comment_questions":\s*"([^"]*)"', content, re.DOTALL)
+        if questions_match:
+            note['comment_questions'] = questions_match.group(1).strip()
+            print(f"❓ 提取到评论问题: {note['comment_questions']}")
+        
+        # 如果没有提取到正文，使用整个内容的前500字符
+        if not note['note_content']:
+            note['note_content'] = content[:500] + '...' if len(content) > 500 else content
+        
+        # 简单的内容解析（作为后备）
+        sections = content.split('\n\n')
         for i, section in enumerate(sections):
-            if i == 0 and len(section) < 100:  # 可能是标题
+            if i == 0 and len(section) < 100 and not title_match:  # 可能是标题
                 note['note_title'] = section.strip()
-            elif '标题' in section:
+            elif '标题' in section and not title_match:
                 note['note_title'] = section.replace('标题：', '').replace('标题', '').strip()
-            elif '正文' in section:
+            elif '正文' in section and not content_match:
                 note['note_content'] = section.replace('正文：', '').replace('正文', '').strip()
-            elif '评论' in section and '引导' in section:
+            elif '评论' in section and '引导' in section and not guide_match:
                 note['comment_guide'] = section.replace('评论引导：', '').strip()
-            elif '问题' in section:
+            elif '问题' in section and not questions_match:
                 note['comment_questions'] = section.replace('互动问题：', '').replace('问题：', '').strip()
         
+        print(f"✅ 备用解析完成，标题: {note['note_title']}")
         return note
 
     async def test_connection(self) -> bool:
