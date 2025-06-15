@@ -156,7 +156,27 @@ async def generate_note(request: NoteGenerateRequest, db: Session = Depends(get_
 def get_notes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
     """获取所有笔记"""
     notes = db.query(XiaohongshuNote).offset(skip).limit(limit).all()
-    return notes
+    # 手动转换数据以避免序列化问题
+    result = []
+    for note in notes:
+        result.append({
+            "id": note.id,
+            "input_basic_content": note.input_basic_content,
+            "input_note_purpose": note.input_note_purpose,
+            "input_recent_trends": note.input_recent_trends,
+            "input_writing_style": note.input_writing_style,
+            "input_target_audience": note.input_target_audience,
+            "input_content_type": note.input_content_type,
+            "input_reference_links": note.input_reference_links,
+            "note_title": note.note_title,
+            "note_content": note.note_content,
+            "comment_guide": note.comment_guide,
+            "comment_questions": note.comment_questions,
+            "model": note.model,
+            "created_at": note.created_at,
+            "updated_at": note.updated_at
+        })
+    return result
 
 @app.get("/notes/{note_id}", response_model=NoteOut)
 def get_note(note_id: int, db: Session = Depends(get_db)):
@@ -164,7 +184,23 @@ def get_note(note_id: int, db: Session = Depends(get_db)):
     note = db.query(XiaohongshuNote).filter(XiaohongshuNote.id == note_id).first()
     if not note:
         raise HTTPException(status_code=404, detail="笔记不存在")
-    return note
+    return {
+        "id": note.id,
+        "input_basic_content": note.input_basic_content,
+        "input_note_purpose": note.input_note_purpose,
+        "input_recent_trends": note.input_recent_trends,
+        "input_writing_style": note.input_writing_style,
+        "input_target_audience": note.input_target_audience,
+        "input_content_type": note.input_content_type,
+        "input_reference_links": note.input_reference_links,
+        "note_title": note.note_title,
+        "note_content": note.note_content,
+        "comment_guide": note.comment_guide,
+        "comment_questions": note.comment_questions,
+        "model": note.model,
+        "created_at": note.created_at,
+        "updated_at": note.updated_at
+    }
 
 @app.put("/notes/{note_id}", response_model=NoteOut)
 def update_note(note_id: int, note_update: NoteUpdate, db: Session = Depends(get_db)):
