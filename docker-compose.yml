@@ -116,6 +116,7 @@ services:
       - CLAUDE_CHANNEL_ID=${CLAUDE_CHANNEL_ID:-3}
     depends_on:
       db:
+<<<<<<< HEAD
         condition: service_healthy
       one-api:
         condition: service_started
@@ -131,4 +132,11 @@ volumes:
 networks:
   app-network:
     driver: bridge
+=======
+        condition: service_healthy  # 等待数据库健康检查通过
+    restart: unless-stopped        # 添加重启策略
+
+volumes:
+  postgres_data:
+>>>>>>> a63529bd6baa08ce59ffcf7c7771ac8da96e6637
 

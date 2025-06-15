@@ -46,8 +46,11 @@ cd my-fullstack-app
 ```bash
 cp .env.example .env
 # 编辑 .env 文件设置您的环境变量
+<<<<<<< HEAD
 openssl rand -base64 32
 # 生成密钥
+=======
+>>>>>>> a63529bd6baa08ce59ffcf7c7771ac8da96e6637
 ```
 
 3. 启动服务

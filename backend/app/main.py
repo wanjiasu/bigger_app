@@ -5,19 +5,26 @@ from app.models import User, XiaohongshuNote
 from app.schemas import UserCreate, UserOut, NoteGenerateRequest, NoteCreate, NoteUpdate, NoteOut
 from app.services.ai_service import ai_service
 from fastapi.middleware.cors import CORSMiddleware
+<<<<<<< HEAD
 from typing import List
 import os
 from dotenv import load_dotenv
+=======
+import os
+>>>>>>> a63529bd6baa08ce59ffcf7c7771ac8da96e6637
 
 # 加载环境变量
 load_dotenv()
 
 app = FastAPI(title="小红书笔记生成器", description="基于多AI模型的小红书图文笔记生成工具")
 
+# 从环境变量获取允许的域名
+allowed_origins = os.getenv("ALLOWED_ORIGINS", "http://localhost:3000").split(",")
+
 # 添加跨域中间件
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # 生产环境建议改为指定域名
+    allow_origins=allowed_origins,  # 使用环境变量配置的域名
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

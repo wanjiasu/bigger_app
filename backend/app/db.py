@@ -2,10 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 import os
 
-# 直接使用 FASTAPI_DB_URL 环境变量
+# 数据库连接URL，从环境变量获取
 DATABASE_URL = os.getenv(
     "FASTAPI_DB_URL",
-    "postgresql://fp_user:fp_pass@db:5432/fp_db"  # 默认值使用 db 而不是 localhost
+    "postgresql://fp_user:fp_pass@db:5432/fp_db"  # 默认值
 )
 
 engine = create_engine(DATABASE_URL)
