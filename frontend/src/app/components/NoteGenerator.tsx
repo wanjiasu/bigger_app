@@ -25,9 +25,10 @@ interface ModelResults {
 }
 
 // 小红书手机预览组件
-function XiaohongshuPreview({ note, copiedContent, copyToClipboard }: { 
+function XiaohongshuPreview({ note, copiedContent, copyingContent, copyToClipboard }: { 
   note: GeneratedNote | null,
   copiedContent: string | null,
+  copyingContent: string | null,
   copyToClipboard: (text: string) => Promise<void>
 }) {
   if (!note) {
@@ -95,7 +96,9 @@ function XiaohongshuPreview({ note, copiedContent, copyToClipboard }: {
                 className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
                 title="复制标题"
               >
-                {copiedContent === note.note_title ? (
+                {copyingContent === note.note_title ? (
+                  <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+                ) : copiedContent === note.note_title ? (
                   <Check className="w-3 h-3 text-green-500" />
                 ) : (
                   <Copy className="w-3 h-3" />
@@ -124,7 +127,9 @@ function XiaohongshuPreview({ note, copiedContent, copyToClipboard }: {
                 className="p-1 text-gray-400 hover:text-gray-600 transition-colors flex-shrink-0"
                 title="复制正文"
               >
-                {copiedContent === note.note_content ? (
+                {copyingContent === note.note_content ? (
+                  <Loader2 className="w-3 h-3 animate-spin text-blue-500" />
+                ) : copiedContent === note.note_content ? (
                   <Check className="w-3 h-3 text-green-500" />
                 ) : (
                   <Copy className="w-3 h-3" />
@@ -189,6 +194,8 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
 
   // 复制功能状态
   const [copiedContent, setCopiedContent] = useState<string | null>(null)
+  const [copyError, setCopyError] = useState<string | null>(null)
+  const [copyingContent, setCopyingContent] = useState<string | null>(null)
 
   // 可用的模型列表
   const availableModels = [
@@ -200,11 +207,46 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
 
   const copyToClipboard = async (text: string) => {
     try {
-      await navigator.clipboard.writeText(text)
-      setCopiedContent(text)
-      setTimeout(() => setCopiedContent(null), 2000)
+      setCopyError(null) // 清除之前的错误
+      setCopyingContent(text) // 设置复制中状态
+      
+      // 优先使用现代 Clipboard API
+      if (navigator?.clipboard && window.isSecureContext) {
+        await navigator.clipboard.writeText(text)
+        setCopiedContent(text)
+        setTimeout(() => setCopiedContent(null), 2000)
+        return
+      }
+      
+      // 降级方案：使用传统的 execCommand 方法
+      const textArea = document.createElement('textarea')
+      textArea.value = text
+      textArea.style.position = 'fixed'
+      textArea.style.left = '-999999px'
+      textArea.style.top = '-999999px'
+      textArea.style.opacity = '0'
+      textArea.setAttribute('readonly', '')
+      document.body.appendChild(textArea)
+      
+      // 选择文本
+      textArea.select()
+      textArea.setSelectionRange(0, 99999) // 移动端兼容
+      
+      const success = document.execCommand('copy')
+      document.body.removeChild(textArea)
+      
+      if (success) {
+        setCopiedContent(text)
+        setTimeout(() => setCopiedContent(null), 2000)
+      } else {
+        throw new Error('复制操作失败')
+      }
     } catch (err) {
       console.error('复制失败:', err)
+      setCopyError('复制失败，请手动选择并复制内容')
+      setTimeout(() => setCopyError(null), 3000)
+    } finally {
+      setCopyingContent(null) // 清除复制中状态
     }
   }
 
@@ -307,6 +349,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                 <XiaohongshuPreview 
                   note={generatedNotes[actualModels[0]]} 
                   copiedContent={copiedContent} 
+                  copyingContent={copyingContent}
                   copyToClipboard={copyToClipboard} 
                 />
               </div>
@@ -395,6 +438,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                       <XiaohongshuPreview 
                         note={note} 
                         copiedContent={copiedContent} 
+                        copyingContent={copyingContent}
                         copyToClipboard={copyToClipboard} 
                       />
 
@@ -713,6 +757,15 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
         {error && (
           <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
             <p className="text-red-600">{error}</p>
+          </div>
+        )}
+
+        {copyError && (
+          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
+            <div className="flex items-center gap-2">
+              <span className="text-orange-500">⚠️</span>
+              <p className="text-orange-600">{copyError}</p>
+            </div>
           </div>
         )}
 
