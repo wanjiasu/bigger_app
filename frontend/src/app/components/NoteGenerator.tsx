@@ -521,140 +521,191 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
 
         {/* 高级参数输入区域 */}
         {showAdvanced && (
-          <div className="bg-gray-50 rounded-lg p-4 mb-6 space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <Target className="w-4 h-4 text-blue-500" />
-                  笔记目的
-                </label>
-                <input
-                  type="text"
-                  value={notePurpose}
-                  onChange={(e) => setNotePurpose(e.target.value)}
-                  placeholder="例如：种草推荐、知识分享、生活记录..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                />
+          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-6 space-y-8">
+            {/* 内容定位设置 */}
+            <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                <Target className="w-5 h-5 text-blue-500" />
+                <h3 className="text-base font-semibold text-gray-800">内容定位</h3>
+                <span className="text-xs text-gray-500 bg-blue-50 px-2 py-1 rounded-full">核心设置</span>
               </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <TrendingUp className="w-4 h-4 text-green-500" />
-                  近期热梗
-                </label>
-                <input
-                  type="text"
-                  value={recentTrends}
-                  onChange={(e) => setRecentTrends(e.target.value)}
-                  placeholder="例如：双十一、春节、热门话题..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                />
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <FileText className="w-4 h-4 text-purple-500" />
-                  写作风格
-                </label>
-                <select
-                  value={writingStyle}
-                  onChange={(e) => setWritingStyle(e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                >
-                  <option value="">请选择写作风格</option>
-                  <option value="轻松幽默">轻松幽默</option>
-                  <option value="专业严谨">专业严谨</option>
-                  <option value="温馨治愈">温馨治愈</option>
-                  <option value="活泼可爱">活泼可爱</option>
-                  <option value="干货分享">干货分享</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <Cpu className="w-4 h-4 text-orange-500" />
-                  AI 模型（默认：GPT-4o，最多选择3个）
-                </label>
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div className="space-y-2">
-                  {availableModels.map((model) => (
-                    <label key={model.value} className="flex items-center gap-2 p-2 rounded-lg hover:bg-gray-50">
-                      <input
-                        type="checkbox"
-                        checked={selectedModels.includes(model.value)}
-                        onChange={(e) => {
-                          if (e.target.checked) {
-                            if (selectedModels.length < 3) {
-                              setSelectedModels([...selectedModels, model.value])
-                            }
-                          } else {
-                            setSelectedModels(selectedModels.filter(m => m !== model.value))
-                          }
-                        }}
-                        className="w-4 h-4 text-pink-500 rounded border-gray-300 focus:ring-pink-500"
-                      />
-                      <span className="text-sm text-gray-700">{model.label}</span>
-                      {model.value === 'gpt-4o' && selectedModels.length === 0 && (
-                        <span className="text-xs text-orange-500">(默认)</span>
-                      )}
-                    </label>
-                  ))}
-                  {selectedModels.length >= 3 && (
-                    <p className="text-xs text-orange-500 mt-1">
-                      已达到最大选择数量（3个模型）
-                    </p>
-                  )}
+                  <label className="text-sm font-medium text-gray-700 block">笔记目的</label>
+                  <select
+                    value={notePurpose}
+                    onChange={(e) => setNotePurpose(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
+                  >
+                    <option value="">请选择笔记目的</option>
+                    <option value="流量互动">🔥 流量互动</option>
+                    <option value="引导到店">🏪 引导到店</option>
+                    <option value="拉动销售">💰 拉动销售</option>
+                    <option value="传播造势">📢 传播造势</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 block">内容类型</label>
+                  <select
+                    value={contentType}
+                    onChange={(e) => setContentType(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 bg-white"
+                  >
+                    <option value="">请选择内容类型</option>
+                    <option value="明星/IP联动">⭐ 明星/IP联动</option>
+                    <option value="节庆/事件营销">🎉 节庆/事件营销</option>
+                    <option value="新店/促销种草">🛍️ 新店/促销种草</option>
+                    <option value="用户UGC共创">👥 用户UGC共创</option>
+                    <option value="休闲/玩乐/购物种草">🎮 休闲/玩乐/购物种草</option>
+                    <option value="品牌宣传">📝 品牌宣传</option>
+                    <option value="通知公告">📋 通知公告</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 block">目标受众</label>
+                  <select
+                    value={targetAudience}
+                    onChange={(e) => setTargetAudience(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-white"
+                  >
+                    <option value="">请选择目标受众</option>
+                    <option value="购物爱好者">🛒 购物爱好者</option>
+                    <option value="实用主义者">⚡ 实用主义者</option>
+                    <option value="价格敏感者">💸 价格敏感者</option>
+                    <option value="决策困难者">🤔 决策困难者</option>
+                    <option value="产品研究者">🔍 产品研究者</option>
+                    <option value="健康生活家">🌱 健康生活家</option>
+                    <option value="生活品质控">✨ 生活品质控</option>
+                    <option value="时尚追随者">👗 时尚追随者</option>
+                    <option value="家庭主妇">👩‍👧‍👦 家庭主妇</option>
+                    <option value="学生党">🎓 学生党</option>
+                  </select>
                 </div>
               </div>
+            </div>
 
-              <div>
-                <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                  <Users className="w-4 h-4 text-orange-500" />
-                  内容受众
-                </label>
-                <input
-                  type="text"
-                  value={targetAudience}
-                  onChange={(e) => setTargetAudience(e.target.value)}
-                  placeholder="例如：职场新人、宝妈、学生党..."
-                  className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-                />
+            {/* 内容风格设置 */}
+            <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                <FileText className="w-5 h-5 text-purple-500" />
+                <h3 className="text-base font-semibold text-gray-800">内容风格</h3>
+                <span className="text-xs text-gray-500 bg-purple-50 px-2 py-1 rounded-full">表达方式</span>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 block">写作风格</label>
+                  <select
+                    value={writingStyle}
+                    onChange={(e) => setWritingStyle(e.target.value)}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white"
+                  >
+                    <option value="">请选择写作风格</option>
+                    <option value="口语化">💬 口语化</option>
+                    <option value="正式">📋 正式</option>
+                    <option value="热情">🔥 热情</option>
+                    <option value="简洁">⚡ 简洁</option>
+                    <option value="礼貌">🙏 礼貌</option>
+                    <option value="高情商">💡 高情商</option>
+                    <option value="抒情">🎭 抒情</option>
+                    <option value="诙谐">😄 诙谐</option>
+                    <option value="夸张/情绪化">🎪 夸张/情绪化</option>
+                    <option value="幽默">😂 幽默</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 block">近期热梗</label>
+                  <input
+                    type="text"
+                    value={recentTrends}
+                    onChange={(e) => setRecentTrends(e.target.value)}
+                    placeholder="例如：双十一、春节、热门话题..."
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white"
+                  />
+                  <p className="text-xs text-gray-500">💡 输入当前热门话题，让内容更贴近时事</p>
+                </div>
               </div>
             </div>
 
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <Sparkles className="w-4 h-4 text-pink-500" />
-                内容类型
-              </label>
-              <select
-                value={contentType}
-                onChange={(e) => setContentType(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-              >
-                <option value="">请选择内容类型</option>
-                <option value="产品种草">产品种草</option>
-                <option value="生活分享">生活分享</option>
-                <option value="知识科普">知识科普</option>
-                <option value="穿搭搭配">穿搭搭配</option>
-                <option value="美食制作">美食制作</option>
-                <option value="旅行攻略">旅行攻略</option>
-                <option value="学习经验">学习经验</option>
-              </select>
-            </div>
+            {/* 技术设置 */}
+            <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                <Cpu className="w-5 h-5 text-orange-500" />
+                <h3 className="text-base font-semibold text-gray-800">技术设置</h3>
+                <span className="text-xs text-gray-500 bg-orange-50 px-2 py-1 rounded-full">高级选项</span>
+              </div>
+              
+              <div className="space-y-5">
+                {/* AI 模型选择 */}
+                <div className="space-y-3">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-medium text-gray-700">AI 模型选择</label>
+                    <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
+                      已选择 {selectedModels.length}/3 个模型
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                    {availableModels.map((model) => (
+                      <label 
+                        key={model.value} 
+                        className={`relative flex items-center gap-2 p-3 rounded-lg border-2 cursor-pointer transition-all duration-200 ${
+                          selectedModels.includes(model.value)
+                            ? 'border-orange-500 bg-orange-50 text-orange-700'
+                            : 'border-gray-200 bg-white hover:border-gray-300 hover:bg-gray-50'
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          checked={selectedModels.includes(model.value)}
+                          onChange={(e) => {
+                            if (e.target.checked) {
+                              if (selectedModels.length < 3) {
+                                setSelectedModels([...selectedModels, model.value])
+                              }
+                            } else {
+                              setSelectedModels(selectedModels.filter(m => m !== model.value))
+                            }
+                          }}
+                          className="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500"
+                        />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-sm font-medium truncate">{model.label}</div>
+                          {model.value === 'gpt-4o' && (
+                            <div className="text-xs text-orange-500">推荐</div>
+                          )}
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                  {selectedModels.length >= 3 && (
+                    <div className="flex items-center gap-2 p-3 bg-orange-50 rounded-lg">
+                      <span className="text-orange-500">⚠️</span>
+                      <p className="text-sm text-orange-600">已达到最大选择数量，多模型对比可获得更好的效果</p>
+                    </div>
+                  )}
+                </div>
 
-            <div>
-              <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                <Link className="w-4 h-4 text-cyan-500" />
-                参考链接
-              </label>
-              <input
-                type="text"
-                value={referenceLinks}
-                onChange={(e) => setReferenceLinks(e.target.value)}
-                placeholder="可输入参考链接，多个链接用逗号分隔..."
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-              />
-              <p className="text-xs text-gray-500 mt-1">注：参考链接暂时仅作记录，不参与实际生成</p>
+                {/* 参考链接 */}
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+                    <Link className="w-4 h-4 text-cyan-500" />
+                    参考链接
+                  </label>
+                  <input
+                    type="text"
+                    value={referenceLinks}
+                    onChange={(e) => setReferenceLinks(e.target.value)}
+                    placeholder="可输入参考链接，多个链接用逗号分隔..."
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 bg-white"
+                  />
+                  <p className="text-xs text-gray-500 flex items-center gap-1">
+                    <span>ℹ️</span>
+                    参考链接暂时仅作记录，不参与实际生成
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         )}
