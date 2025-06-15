@@ -6,6 +6,7 @@ from datetime import datetime
 
 class AIModel(str, Enum):
     CLAUDE_3_5_SONNET = "claude-3-5-sonnet-latest"
+    CLAUDE_SONNET_4 = "claude-sonnet-4-20250514"
     GPT_4O = "gpt-4o"
     DEEPSEEK_R1 = "deepseek-r1"
     GLM_4 = "glm-4"
@@ -21,6 +22,7 @@ class AIService:
         # 模型映射到One-API中的实际模型名称
         self.model_mapping = {
             AIModel.CLAUDE_3_5_SONNET: "claude-3-5-sonnet-latest",
+            AIModel.CLAUDE_SONNET_4: "claude-sonnet-4-20250514",
             AIModel.GPT_4O: "gpt-4o", 
             AIModel.DEEPSEEK_R1: "deepseek-r1",
             AIModel.GLM_4: "glm-4"
@@ -252,6 +254,7 @@ class AIService:
         """获取模型的显示名称"""
         display_names = {
             "claude-3-5-sonnet-latest": "Claude 3.5 Sonnet",
+            "claude-sonnet-4-20250514": "Claude Sonnet 4",
             "gpt-4o": "GPT-4o",
             "deepseek-r1": "DeepSeek R1",
             "glm-4": "GLM-4"

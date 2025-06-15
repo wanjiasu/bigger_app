@@ -201,6 +201,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
   // 可用的模型列表
   const availableModels = [
     { value: 'claude-3-5-sonnet-latest', label: 'Claude 3.5 Sonnet' },
+    { value: 'claude-sonnet-4-20250514', label: 'Claude Sonnet 4' },
     { value: 'gpt-4o', label: 'GPT-4o' },
     { value: 'deepseek-r1', label: 'DeepSeek R1' },
     { value: 'glm-4', label: 'GLM-4' }
@@ -774,7 +775,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                       已选择 {selectedModels.length}/3 个模型
                     </span>
                   </div>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                  <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-3">
                     {availableModels.map((model) => (
                       <label 
                         key={model.value} 
