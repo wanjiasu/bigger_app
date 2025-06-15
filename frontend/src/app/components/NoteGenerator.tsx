@@ -815,16 +815,15 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                                     className="inline-flex items-center gap-1 px-2 py-1 bg-orange-100 text-orange-700 text-xs rounded-full"
                                   >
                                     {model?.label}
-                                    <button
-                                      type="button"
-                                      onClick={(e) => {
-                                        e.stopPropagation()
-                                        setSelectedModels(selectedModels.filter(m => m !== modelValue))
-                                      }}
-                                      className="hover:bg-orange-200 rounded-full p-0.5 transition-colors"
-                                    >
-                                      <X className="w-3 h-3" />
-                                    </button>
+                                                                         <span
+                                       onClick={(e) => {
+                                         e.stopPropagation()
+                                         setSelectedModels(selectedModels.filter(m => m !== modelValue))
+                                       }}
+                                       className="hover:bg-orange-200 rounded-full p-0.5 transition-colors cursor-pointer"
+                                     >
+                                       <X className="w-3 h-3" />
+                                     </span>
                                   </span>
                                 )
                               })}
