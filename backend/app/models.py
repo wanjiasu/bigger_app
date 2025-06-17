@@ -21,6 +21,12 @@ class XiaohongshuNote(Base):
     input_target_audience = Column(Text, nullable=True)  # 内容受众
     input_content_type = Column(Text, nullable=True)  # 内容类型
     input_reference_links = Column(Text, nullable=True)  # 参考链接
+    # 账号信息字段
+    input_account_name = Column(String(100), nullable=True)  # 账号名称
+    input_account_type = Column(String(50), nullable=True)  # 账号类型
+    input_topic_keywords = Column(Text, nullable=True)  # 话题关键词
+    input_platform = Column(String(50), nullable=True)  # 发布平台
+    input_selected_account_id = Column(Integer, nullable=True)  # 选中的存储账号ID
     note_title = Column(Text)
     note_content = Column(Text, nullable=False)  # 笔记正文
     comment_guide = Column(Text, nullable=False)  # 评论区引导文案

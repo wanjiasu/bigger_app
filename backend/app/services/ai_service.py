@@ -108,7 +108,11 @@ class AIService:
                           writing_style: Optional[str] = None,
                           target_audience: Optional[str] = None,
                           content_type: Optional[str] = None,
-                          reference_links: Optional[str] = None) -> Dict[str, str]:
+                          reference_links: Optional[str] = None,
+                          account_name: Optional[str] = None,
+                          account_type: Optional[str] = None,
+                          topic_keywords: Optional[str] = None,
+                          platform: Optional[str] = None) -> Dict[str, str]:
         """生成小红书笔记"""
         
         # 根据选择的模型确定使用哪个模型
@@ -117,6 +121,8 @@ class AIService:
         print(f"\n📝 开始生成笔记...")
         print(f"🤖 使用模型: {selected_model}")
         print(f"📄 基础内容: {basic_content[:100]}...")
+        if account_name:
+            print(f"👤 账号信息: {account_name} ({account_type}) - {platform}")
         
         # 构建系统提示词
         system_prompt = """你是一个专业的小红书内容创作专家，擅长根据用户需求生成高质量的小红书图文笔记。
@@ -136,13 +142,27 @@ class AIService:
 4. 如果有近期热梗，要巧妙融入内容中
 5. 评论引导要能激发用户参与
 6. 问题要具体且容易回答
-7. 整体内容要围绕笔记目的展开"""
+7. 整体内容要围绕笔记目的展开
+8. 如果提供了账号信息，要根据账号类型和常驻话题优化内容风格和关键词"""
         
         # 构建用户提示词
         user_prompt = f"""请根据以下信息生成小红书笔记：
 
 基本内容：{basic_content}
 """
+        
+        # 添加账号信息到提示词中
+        if account_name or account_type or topic_keywords or platform:
+            user_prompt += "\n账号信息：\n"
+            if account_name:
+                user_prompt += f"账号名称：{account_name}\n"
+            if account_type:
+                user_prompt += f"账号类型：{account_type}\n"
+            if platform:
+                user_prompt += f"发布平台：{platform}\n"
+            if topic_keywords:
+                user_prompt += f"常驻话题关键词：{topic_keywords}\n"
+                user_prompt += "请结合这些关键词优化内容，使其更符合该账号的定位和风格。\n"
         
         if note_purpose:
             user_prompt += f"笔记目的：{note_purpose}\n"

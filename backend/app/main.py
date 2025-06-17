@@ -99,7 +99,11 @@ async def generate_note(request: NoteGenerateRequest, db: Session = Depends(get_
                     writing_style=request.writing_style,
                     target_audience=request.target_audience,
                     content_type=request.content_type,
-                    reference_links=request.reference_links
+                    reference_links=request.reference_links,
+                    account_name=request.account_name,
+                    account_type=request.account_type,
+                    topic_keywords=request.topic_keywords,
+                    platform=request.platform
                 )
                 
                 # 保存到数据库
@@ -111,14 +115,18 @@ async def generate_note(request: NoteGenerateRequest, db: Session = Depends(get_
                     input_target_audience=request.target_audience,
                     input_content_type=request.content_type,
                     input_reference_links=request.reference_links,
+                    input_account_name=request.account_name,
+                    input_account_type=request.account_type,
+                    input_topic_keywords=request.topic_keywords,
+                    input_platform=request.platform,
+                    input_selected_account_id=request.selected_account_id,
                     note_title=result.get("note_title", ""),
                     note_content=result.get("note_content", ""),
                     comment_guide=result.get("comment_guide", ""),
-                    comment_questions=result.get("comment_questions", ""),
-                    model=model  # 添加模型标识
+                    comment_questions=result.get("comment_questions", "")
                 )
                 
-                db_note = XiaohongshuNote(**note_data.dict())
+                db_note = XiaohongshuNote(**note_data.dict(), model=model)
                 db.add(db_note)
                 db.commit()
                 db.refresh(db_note)
@@ -169,6 +177,11 @@ def get_notes(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
             "input_target_audience": note.input_target_audience,
             "input_content_type": note.input_content_type,
             "input_reference_links": note.input_reference_links,
+            "input_account_name": note.input_account_name,
+            "input_account_type": note.input_account_type,
+            "input_topic_keywords": note.input_topic_keywords,
+            "input_platform": note.input_platform,
+            "input_selected_account_id": note.input_selected_account_id,
             "note_title": note.note_title,
             "note_content": note.note_content,
             "comment_guide": note.comment_guide,
@@ -194,6 +207,11 @@ def get_note(note_id: int, db: Session = Depends(get_db)):
         "input_target_audience": note.input_target_audience,
         "input_content_type": note.input_content_type,
         "input_reference_links": note.input_reference_links,
+        "input_account_name": note.input_account_name,
+        "input_account_type": note.input_account_type,
+        "input_topic_keywords": note.input_topic_keywords,
+        "input_platform": note.input_platform,
+        "input_selected_account_id": note.input_selected_account_id,
         "note_title": note.note_title,
         "note_content": note.note_content,
         "comment_guide": note.comment_guide,

@@ -25,7 +25,13 @@ class NoteGenerateRequest(BaseModel):
     target_audience: Optional[str] = None
     content_type: Optional[str] = None
     reference_links: Optional[str] = None
-    ai_model: Optional[str] = None  # 新增AI模型选择字段
+    ai_model: Optional[str] = None  # AI模型选择字段
+    # 账号信息字段
+    account_name: Optional[str] = None
+    account_type: Optional[str] = None
+    topic_keywords: Optional[str] = None
+    platform: Optional[str] = None
+    selected_account_id: Optional[int] = None  # 选中的存储账号ID
 
 class NoteCreate(BaseModel):
     input_basic_content: str
@@ -35,6 +41,12 @@ class NoteCreate(BaseModel):
     input_target_audience: Optional[str] = None
     input_content_type: Optional[str] = None
     input_reference_links: Optional[str] = None
+    # 账号信息字段
+    input_account_name: Optional[str] = None
+    input_account_type: Optional[str] = None
+    input_topic_keywords: Optional[str] = None
+    input_platform: Optional[str] = None
+    input_selected_account_id: Optional[int] = None
     note_title: str
     note_content: str
     comment_guide: str
@@ -55,6 +67,12 @@ class NoteOut(BaseModel):
     input_target_audience: Optional[str] = None
     input_content_type: Optional[str] = None
     input_reference_links: Optional[str] = None
+    # 账号信息字段
+    input_account_name: Optional[str] = None
+    input_account_type: Optional[str] = None
+    input_topic_keywords: Optional[str] = None
+    input_platform: Optional[str] = None
+    input_selected_account_id: Optional[int] = None
     note_title: str
     note_content: str
     comment_guide: str
