@@ -174,6 +174,17 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
   const [basicContent, setBasicContent] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(true)
   
+  // 账号信息参数
+  const [accountInfo, setAccountInfo] = useState({
+    account_name: '',
+    account_type: '',
+    topic_keywords: '',
+    platform: '小红书'
+  })
+  // 移除 useStoredAccount 状态，直接通过 selectedAccountId 判断
+  const [storedAccounts, setStoredAccounts] = useState<any[]>([])
+  const [selectedAccountId, setSelectedAccountId] = useState<number | null>(null)
+  
   // 高级参数
   const [notePurpose, setNotePurpose] = useState('')
   const [recentTrends, setRecentTrends] = useState('')
@@ -197,6 +208,22 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
   const [copyError, setCopyError] = useState<string | null>(null)
   const [copyingContent, setCopyingContent] = useState<string | null>(null)
   const [allContentCopied, setAllContentCopied] = useState(false)
+
+  // 获取存储的账号信息
+  useEffect(() => {
+    const fetchStoredAccounts = async () => {
+      try {
+        const response = await fetch(`${API_ENDPOINTS.NOTES_LIST.replace('/notes/', '/client-accounts/')}`)
+        if (response.ok) {
+          const accounts = await response.json()
+          setStoredAccounts(accounts)
+        }
+      } catch (error) {
+        console.error('获取账号信息失败:', error)
+      }
+    }
+    fetchStoredAccounts()
+  }, [])
   
   // 多选下拉状态
   const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false)
@@ -390,6 +417,22 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
     setError('')
   }
 
+  // 处理账号选择
+  const handleAccountSelect = (accountId: number) => {
+    const selectedAccount = storedAccounts.find(acc => acc.id === accountId)
+    if (selectedAccount) {
+      setAccountInfo({
+        account_name: selectedAccount.account_name,
+        account_type: selectedAccount.account_type,
+        topic_keywords: selectedAccount.topic_keywords?.join(', ') || '',
+        platform: selectedAccount.platform
+      })
+      setSelectedAccountId(accountId)
+    }
+  }
+
+  // 移除 handleToggleStoredAccount 函数，不再需要
+
   // 获取实际使用的模型列表
   const actualModels = selectedModels.length > 0 ? selectedModels : ['gpt-4o']
 
@@ -397,22 +440,38 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
   if (showResults) {
     return (
       <div className="max-w-7xl mx-auto">
-        <div className="bg-white rounded-xl shadow-lg p-6">
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-2">
-              <Sparkles className="w-6 h-6 text-pink-500" />
-              <h2 className="text-xl font-bold text-gray-800">
-                {actualModels.length === 1 ? '生成结果' : '模型对比结果'}
-              </h2>
+        <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+          {/* 结果页头部 */}
+          <div className="p-6 border-b border-gray-100">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+                  <Sparkles className="w-6 h-6 text-white" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-semibold text-gray-800">
+                    {actualModels.length === 1 ? '生成结果' : '模型对比结果'}
+                  </h3>
+                  <p className="text-sm text-gray-600">
+                    {actualModels.length === 1 
+                      ? 'AI 生成的内容已准备就绪' 
+                      : `${actualModels.length} 个模型的生成结果对比`
+                    }
+                  </p>
+                </div>
+              </div>
+              <button
+                onClick={handleBackToInput}
+                className="px-4 py-2 text-gray-600 hover:text-pink-600 transition-colors flex items-center gap-2 rounded-lg hover:bg-pink-50"
+              >
+                <ChevronDown className="w-4 h-4 rotate-90" />
+                返回编辑
+              </button>
             </div>
-            <button
-              onClick={handleBackToInput}
-              className="px-4 py-2 text-gray-600 hover:text-pink-600 transition-colors flex items-center gap-2"
-            >
-              <ChevronDown className="w-4 h-4 rotate-90" />
-              返回编辑
-            </button>
           </div>
+
+          {/* 结果内容 */}
+          <div className="p-6">
 
           {actualModels.length === 1 ? (
             // 单个模型结果展示
@@ -624,6 +683,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
               )}
             </div>
           )}
+          </div>
         </div>
       </div>
     )
@@ -632,49 +692,135 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
   // 输入页面
   return (
     <div className="max-w-4xl mx-auto">
-      <div className="bg-white rounded-xl shadow-lg p-6">
-        <div className="flex items-center gap-2 mb-6">
-          <Sparkles className="w-6 h-6 text-pink-500" />
-          <h2 className="text-xl font-bold text-gray-800">内容生成</h2>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        {/* 表单头部 */}
+        <div className="p-6 border-b border-gray-100">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
+              <Sparkles className="w-6 h-6 text-white" />
+            </div>
+            <div>
+              <h3 className="text-lg font-semibold text-gray-800">智能内容生成</h3>
+              <p className="text-sm text-gray-600">基于 DeepSeek AI 的智能小红书图文笔记生成工具</p>
+            </div>
+          </div>
         </div>
 
-        {/* 基本内容输入 */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium text-gray-700 mb-2">
-            基本内容 <span className="text-red-500">*</span>
-          </label>
-          <textarea
-            value={basicContent}
-            onChange={(e) => setBasicContent(e.target.value)}
-            placeholder="请输入您想要生成的基本内容描述..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none"
-            rows={4}
-          />
-        </div>
+        {/* 表单内容 */}
+        <div className="p-6 space-y-6">
 
-        {/* 高级参数切换 */}
-        <div className="mb-4">
-          <button
-            onClick={() => setShowAdvanced(!showAdvanced)}
-            className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-            <span className="text-sm font-medium">高级参数设置</span>
-            <ChevronDown 
-              className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} 
+          {/* 基本内容输入 */}
+          <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-6 border border-pink-100">
+            <div className="flex items-center gap-2 mb-4">
+              <FileText className="w-5 h-5 text-pink-500" />
+              <h3 className="text-base font-semibold text-gray-800">基本内容</h3>
+              <span className="text-xs text-red-500 bg-red-100 px-2 py-1 rounded-full">必填</span>
+            </div>
+            <textarea
+              value={basicContent}
+              onChange={(e) => setBasicContent(e.target.value)}
+              placeholder="请详细描述您想要生成的内容，包括主题、要点、风格等..."
+              className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none bg-white"
+              rows={4}
             />
-          </button>
-        </div>
+            <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
+              <span>💡</span>
+              描述越详细，AI 生成的内容越符合您的需求
+            </p>
+          </div>
 
-        {/* 高级参数输入区域 */}
-        {showAdvanced && (
-          <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 mb-6 space-y-8">
+
+
+          {/* 高级参数切换 */}
+          <div className="border-t border-gray-100 pt-6">
+            <button
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors p-3 rounded-lg hover:bg-pink-50 w-full"
+            >
+              <Settings className="w-5 h-5" />
+              <span className="text-sm font-medium">高级参数设置</span>
+              <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-auto mr-2">
+                {showAdvanced ? '收起' : '展开'}
+              </span>
+              <ChevronDown 
+                className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} 
+              />
+            </button>
+          </div>
+
+          {/* 高级参数输入区域 */}
+          {showAdvanced && (
+            <div className="bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl p-6 space-y-6 border border-gray-200">
+            {/* 账号信息设置 */}
+            <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
+              <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
+                <Users className="w-5 h-5 text-blue-500" />
+                <h3 className="text-base font-semibold text-gray-800">账号信息</h3>
+                <span className="text-xs text-gray-500 bg-blue-50 px-2 py-1 rounded-full">个性化设置</span>
+              </div>
+              <div className="space-y-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700 block">选择账号</label>
+                  <select
+                    value={selectedAccountId || ''}
+                    onChange={(e) => {
+                      const accountId = parseInt(e.target.value)
+                      if (accountId) {
+                        handleAccountSelect(accountId)
+                      } else {
+                        // 清空账号信息
+                        setSelectedAccountId(null)
+                        setAccountInfo({
+                          account_name: '',
+                          account_type: '',
+                          topic_keywords: '',
+                          platform: '小红书'
+                        })
+                      }
+                    }}
+                    className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
+                  >
+                    <option value="">请选择已存储的账号（可选）</option>
+                    {storedAccounts.map((account) => (
+                      <option key={account.id} value={account.id}>
+                        {account.account_name} ({account.account_type} - {account.platform})
+                      </option>
+                    ))}
+                  </select>
+                  <p className="text-xs text-gray-500">💡 选择账号后将使用该账号的话题关键词优化生成内容</p>
+                </div>
+
+                {selectedAccountId && (
+                  <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
+                    <h4 className="text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
+                      <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
+                      当前选中账号
+                    </h4>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-600">账号名称：</span>
+                        <span className="font-medium text-blue-700">{accountInfo.account_name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-600">账号类型：</span>
+                        <span className="font-medium text-blue-700">{accountInfo.account_type}</span>
+                      </div>
+                      <div className="md:col-span-2 flex items-start gap-2">
+                        <span className="text-gray-600 mt-0.5">常驻话题：</span>
+                        <span className="font-medium text-blue-700 flex-1">{accountInfo.topic_keywords || '未设置'}</span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
             {/* 内容定位设置 */}
             <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
-                <Target className="w-5 h-5 text-blue-500" />
+                <Target className="w-5 h-5 text-green-500" />
                 <h3 className="text-base font-semibold text-gray-800">内容定位</h3>
-                <span className="text-xs text-gray-500 bg-blue-50 px-2 py-1 rounded-full">核心设置</span>
+                <span className="text-xs text-gray-500 bg-green-50 px-2 py-1 rounded-full">核心设置</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div className="space-y-2">
@@ -935,56 +1081,62 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
           </div>
         )}
 
-        {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-            <p className="text-red-600">{error}</p>
-          </div>
-        )}
-
-        {copyError && (
-          <div className="bg-orange-50 border border-orange-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center gap-2">
-              <span className="text-orange-500">⚠️</span>
-              <p className="text-orange-600">{copyError}</p>
+          {error && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-red-500">❌</span>
+                <p className="text-red-600">{error}</p>
+              </div>
             </div>
-          </div>
-        )}
+          )}
 
-        {allContentCopied && (
-          <div className="bg-green-50 border border-green-200 rounded-lg p-4 mb-6">
-            <div className="flex items-center gap-2">
-              <Check className="w-5 h-5 text-green-500" />
-              <p className="text-green-600 font-medium">内容已成功复制到剪贴板！</p>
+          {copyError && (
+            <div className="bg-orange-50 border border-orange-200 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <span className="text-orange-500">⚠️</span>
+                <p className="text-orange-600">{copyError}</p>
+              </div>
             </div>
+          )}
+
+          {allContentCopied && (
+            <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+              <div className="flex items-center gap-2">
+                <Check className="w-5 h-5 text-green-500" />
+                <p className="text-green-600 font-medium">内容已成功复制到剪贴板！</p>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* 底部按钮区域 */}
+        <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 rounded-b-xl">
+          <div className="flex gap-4">
+            <button
+              onClick={handleGenerate}
+              disabled={isLoading || !basicContent.trim()}
+              className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2 shadow-sm"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  生成中...
+                </>
+              ) : (
+                <>
+                  <Send className="w-4 h-4" />
+                  开始生成 ({actualModels.length} 个模型)
+                </>
+              )}
+            </button>
+
+            <button
+              onClick={handleReset}
+              className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-all duration-200 bg-white shadow-sm"
+            >
+              重置
+            </button>
           </div>
-        )}
-
-        {/* 生成按钮 */}
-        <div className="flex gap-4">
-          <button
-            onClick={handleGenerate}
-            disabled={isLoading || !basicContent.trim()}
-            className="flex-1 bg-gradient-to-r from-pink-500 to-purple-600 text-white px-6 py-3 rounded-lg font-medium hover:from-pink-600 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 flex items-center justify-center gap-2"
-          >
-            {isLoading ? (
-              <>
-                <Loader2 className="w-4 h-4 animate-spin" />
-                生成中...
-              </>
-            ) : (
-              <>
-                <Send className="w-4 h-4" />
-                开始生成 ({actualModels.length} 个模型)
-              </>
-            )}
-          </button>
-
-          <button
-            onClick={handleReset}
-            className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200"
-          >
-            重置
-          </button>
         </div>
       </div>
     </div>

@@ -1,5 +1,5 @@
 from pydantic import BaseModel, EmailStr
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime
 
 class UserCreate(BaseModel):
@@ -60,6 +60,23 @@ class NoteOut(BaseModel):
     comment_guide: str
     comment_questions: str
     model: Optional[str] = None
+    created_at: datetime
+    updated_at: Optional[datetime] = None
+
+    class Config:
+        from_attributes = True
+
+class ClientAccountBase(BaseModel):
+    account_name: str
+    account_type: str
+    topic_keywords: Optional[List[str]] = None
+    platform: str
+
+class ClientAccountCreate(ClientAccountBase):
+    pass
+
+class ClientAccount(ClientAccountBase):
+    id: int
     created_at: datetime
     updated_at: Optional[datetime] = None
 
