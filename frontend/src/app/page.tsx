@@ -8,6 +8,11 @@ import { FileText, Sparkles, BarChart3, Users, Settings, HelpCircle, Shield, Tre
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'generate' | 'manage' | 'history'>('generate')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
+  const [loginTime, setLoginTime] = useState<string>('')
+
+  useEffect(() => {
+    setLoginTime(new Date().toLocaleDateString())
+  }, [])
 
   const handleNoteGenerated = () => {
     setRefreshTrigger(prev => prev + 1)
@@ -117,7 +122,7 @@ export default function Home() {
               </p>
             </div>
             <div className="text-sm text-gray-500">
-              最近登录时间: 2025-05-28
+              {loginTime && `最近登录时间: ${loginTime}`}
             </div>
           </div>
         </div>
