@@ -3,10 +3,11 @@
 import { useState, useEffect } from 'react'
 import { NoteGenerator } from './components/NoteGenerator'
 import { NotesTable } from './components/NotesTable'
+import { ClientAccountTable } from './components/ClientAccountTable'
 import { FileText, Sparkles, BarChart3, Users, Settings, HelpCircle, Shield, TrendingUp } from 'lucide-react'
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState<'generate' | 'manage' | 'history'>('generate')
+  const [activeTab, setActiveTab] = useState<'generate' | 'manage' | 'history' | 'account'>('generate')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [loginTime, setLoginTime] = useState<string>('')
 
@@ -19,7 +20,7 @@ export default function Home() {
   }
 
   const sidebarItems = [
-    { id: 'account', label: '账号管理', icon: Users, active: false, disabled: true },
+    { id: 'account', label: '账号信息', icon: Users, active: activeTab === 'account', disabled: false },
     { id: 'generate', label: '内容生成', icon: Sparkles, active: activeTab === 'generate' },
     { id: 'history', label: '历史记录', icon: FileText, active: activeTab === 'history' },
     { id: 'violation', label: '违规检测', icon: Shield, active: false, disabled: true },
@@ -56,7 +57,7 @@ export default function Home() {
             {sidebarItems.map((item) => (
               <button
                 key={item.id}
-                onClick={() => !item.disabled && (item.id === 'generate' || item.id === 'history') && setActiveTab(item.id as 'generate' | 'manage' | 'history')}
+                onClick={() => !item.disabled && (item.id === 'generate' || item.id === 'history' || item.id === 'account') && setActiveTab(item.id as 'generate' | 'manage' | 'history' | 'account')}
                 disabled={item.disabled}
                 className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 relative ${
                   item.active
@@ -109,6 +110,8 @@ export default function Home() {
                   ? '内容生成' 
                   : activeTab === 'history' 
                   ? '历史记录' 
+                  : activeTab === 'account'
+                  ? '账号信息'
                   : '管理笔记'
                 }
               </h2>
@@ -117,6 +120,8 @@ export default function Home() {
                   ? '基于 DeepSeek AI 的智能小红书图文笔记生成工具' 
                   : activeTab === 'history'
                   ? '查看所有历史生成记录，包含详细参数和生成结果'
+                  : activeTab === 'account'
+                  ? '管理您的社交媒体账号信息，包括账号类型和常驻话题'
                   : '查看和管理已生成的笔记内容'
                 }
               </p>
@@ -134,6 +139,8 @@ export default function Home() {
               <NoteGenerator onNoteGenerated={handleNoteGenerated} />
             ) : activeTab === 'history' ? (
               <NotesTable refreshTrigger={refreshTrigger} showDetailed={true} />
+            ) : activeTab === 'account' ? (
+              <ClientAccountTable refreshTrigger={refreshTrigger} />
             ) : (
               <NotesTable refreshTrigger={refreshTrigger} showDetailed={false} />
             )}

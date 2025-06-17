@@ -1,8 +1,9 @@
 from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db import Base, engine, SessionLocal
-from app.models import User, XiaohongshuNote
-from app.schemas import UserCreate, UserOut, NoteGenerateRequest, NoteCreate, NoteUpdate, NoteOut
+from app.models import User, XiaohongshuNote, ClientAccount
+from app.schemas import UserCreate, UserOut, NoteGenerateRequest, NoteCreate, NoteUpdate, NoteOut, ClientAccountCreate
+from app import schemas, models
 from app.services.ai_service import ai_service
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
@@ -227,6 +228,62 @@ def delete_note(note_id: int, db: Session = Depends(get_db)):
     db.delete(note)
     db.commit()
     return {"message": "笔记删除成功"}
+
+@app.post("/client-accounts/")
+def create_client_account(account: ClientAccountCreate, db: Session = Depends(get_db)):
+    db_account = models.ClientAccount(**account.dict())
+    db.add(db_account)
+    db.commit()
+    db.refresh(db_account)
+    return {
+        "id": db_account.id,
+        "account_name": db_account.account_name,
+        "account_type": db_account.account_type,
+        "topic_keywords": db_account.topic_keywords,
+        "platform": db_account.platform,
+        "created_at": db_account.created_at,
+        "updated_at": db_account.updated_at
+    }
+
+@app.get("/client-accounts/")
+def get_client_accounts(skip: int = 0, limit: int = 100, db: Session = Depends(get_db)):
+    accounts = db.query(models.ClientAccount).offset(skip).limit(limit).all()
+    return [
+        {
+            "id": account.id,
+            "account_name": account.account_name,
+            "account_type": account.account_type,
+            "topic_keywords": account.topic_keywords,
+            "platform": account.platform,
+            "created_at": account.created_at,
+            "updated_at": account.updated_at
+        }
+        for account in accounts
+    ]
+
+@app.get("/client-accounts/{account_id}")
+def get_client_account(account_id: int, db: Session = Depends(get_db)):
+    account = db.query(models.ClientAccount).filter(models.ClientAccount.id == account_id).first()
+    if account is None:
+        raise HTTPException(status_code=404, detail="Account not found")
+    return {
+        "id": account.id,
+        "account_name": account.account_name,
+        "account_type": account.account_type,
+        "topic_keywords": account.topic_keywords,
+        "platform": account.platform,
+        "created_at": account.created_at,
+        "updated_at": account.updated_at
+    }
+
+@app.delete("/client-accounts/{account_id}")
+def delete_client_account(account_id: int, db: Session = Depends(get_db)):
+    account = db.query(models.ClientAccount).filter(models.ClientAccount.id == account_id).first()
+    if account is None:
+        raise HTTPException(status_code=404, detail="Account not found")
+    db.delete(account)
+    db.commit()
+    return {"message": "Account deleted successfully"}
 
 @app.get("/")
 def root():

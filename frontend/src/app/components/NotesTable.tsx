@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Eye, Edit, Trash2, Search, RefreshCw } from 'lucide-react'
+import { Eye, Edit, Trash2, Search, RefreshCw, FileText, Calendar, Tag } from 'lucide-react'
 import axios from 'axios'
 import { NoteDetailModal } from './NoteDetailModal'
 import { EditNoteModal } from './EditNoteModal'
@@ -104,10 +104,9 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
 
   if (loading) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8">
-        <div className="flex items-center justify-center py-12">
-          <RefreshCw className="w-8 h-8 animate-spin text-pink-500" />
-          <span className="ml-2 text-gray-600">加载中...</span>
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+        <div className="flex items-center justify-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-pink-500"></div>
         </div>
       </div>
     )
@@ -115,157 +114,177 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
 
   if (error) {
     return (
-      <div className="bg-white rounded-xl shadow-lg p-8">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100">
         <div className="text-center py-12">
-          <p className="text-red-600 mb-4">{error}</p>
-          <button
-            onClick={fetchNotes}
-            className="bg-pink-500 text-white px-4 py-2 rounded-lg hover:bg-pink-600 transition-colors"
-          >
-            重试
-          </button>
+          <div className="flex flex-col items-center">
+            <FileText className="w-12 h-12 text-gray-300 mb-4" />
+            <p className="text-red-600 mb-4">{error}</p>
+            <button
+              onClick={fetchNotes}
+              className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all duration-200"
+            >
+              重试
+            </button>
+          </div>
         </div>
       </div>
     )
   }
 
   return (
-    <div className="bg-white rounded-xl shadow-lg p-8">
-      <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-800">
-          {showDetailed ? '历史记录详情' : '笔记管理'}
-        </h2>
-        <div className="flex items-center gap-4">
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="搜索笔记..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent"
-            />
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100">
+      {/* 表格头部 */}
+      <div className="p-6 border-b border-gray-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className="text-lg font-semibold text-gray-800">
+              {showDetailed ? '历史记录详情' : '笔记管理'}
+            </h3>
+            <p className="text-sm text-gray-600 mt-1">
+              {showDetailed 
+                ? '查看所有历史生成记录，包含详细参数和生成结果'
+                : '管理已生成的笔记内容'
+              }
+            </p>
           </div>
-          <button
-            onClick={fetchNotes}
-            className="p-2 text-gray-600 hover:text-pink-500 transition-colors"
-            title="刷新"
-          >
-            <RefreshCw className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+              <input
+                type="text"
+                placeholder="搜索笔记..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent text-sm"
+              />
+            </div>
+            <button
+              onClick={fetchNotes}
+              className="p-2 text-gray-600 hover:text-pink-500 transition-colors rounded-lg hover:bg-pink-50"
+              title="刷新"
+            >
+              <RefreshCw className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
 
+      {/* 表格内容 */}
       {filteredNotes.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-gray-500">
-            {searchTerm ? '没有找到匹配的笔记' : '还没有生成任何笔记'}
-          </p>
+        <div className="px-6 py-12 text-center text-gray-500">
+          <div className="flex flex-col items-center">
+            <FileText className="w-12 h-12 text-gray-300 mb-4" />
+            <p className="text-lg font-medium">
+              {searchTerm ? '没有找到匹配的笔记' : '暂无笔记记录'}
+            </p>
+            <p className="text-sm">
+              {searchTerm ? '尝试调整搜索条件' : '开始生成您的第一个笔记吧'}
+            </p>
+          </div>
         </div>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full">
-            <thead>
-              <tr className="border-b border-gray-200">
+            <thead className="bg-gray-50">
+              <tr>
                 {showDetailed && (
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">ID</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                 )}
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">标题</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">基本内容</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">标题</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">基本内容</th>
                 {showDetailed && (
                   <>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">笔记目的</th>
-                    <th className="text-left py-3 px-4 font-semibold text-gray-700">近期热梗</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">笔记目的</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">近期热梗</th>
                   </>
                 )}
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">内容类型</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">目标受众</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">写作风格</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">内容类型</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">目标受众</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">写作风格</th>
                 {showDetailed && (
-                  <th className="text-left py-3 px-4 font-semibold text-gray-700">参考链接</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">参考链接</th>
                 )}
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">创建时间</th>
-                <th className="text-left py-3 px-4 font-semibold text-gray-700">操作</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="bg-white divide-y divide-gray-200">
               {filteredNotes.map((note) => (
-                <tr key={note.id} className="border-b border-gray-100 hover:bg-gray-50">
+                <tr key={note.id} className="hover:bg-gray-50">
                   {showDetailed && (
-                    <td className="py-4 px-4">
-                      <div className="font-mono text-sm text-blue-600 bg-blue-50 px-2 py-1 rounded">
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                         #{note.id}
-                      </div>
+                      </span>
                     </td>
                   )}
-                  <td className="py-4 px-4">
-                    <div className="font-medium text-gray-800">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <div className="text-sm font-medium text-gray-900">
                       {truncateText(note.note_title, showDetailed ? 25 : 30)}
                     </div>
                   </td>
-                  <td className="py-4 px-4">
-                    <div className="text-gray-600">
+                  <td className="px-6 py-4">
+                    <div className="text-sm text-gray-600">
                       {truncateText(note.input_basic_content, showDetailed ? 30 : 40)}
                     </div>
                   </td>
                   {showDetailed && (
                     <>
-                      <td className="py-4 px-4">
-                        <div className="text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-green-100 text-green-800">
                           {truncateText(note.input_note_purpose, 15)}
-                        </div>
+                        </span>
                       </td>
-                      <td className="py-4 px-4">
-                        <div className="text-gray-600">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-yellow-100 text-yellow-800">
                           {truncateText(note.input_recent_trends, 15)}
-                        </div>
+                        </span>
                       </td>
                     </>
                   )}
-                  <td className="py-4 px-4">
-                    <div className="text-gray-600">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
                       {truncateText(note.input_content_type, 15)}
-                    </div>
+                    </span>
                   </td>
-                  <td className="py-4 px-4">
-                    <div className="text-gray-600">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
                       {truncateText(note.input_target_audience, 15)}
-                    </div>
+                    </span>
                   </td>
-                  <td className="py-4 px-4">
-                    <div className="text-gray-600">
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-pink-100 text-pink-800">
                       {truncateText(note.input_writing_style, 15)}
-                    </div>
+                    </span>
                   </td>
                   {showDetailed && (
-                    <td className="py-4 px-4">
-                      <div className="text-gray-600">
-                        {note.input_reference_links ? (
-                          <a 
-                            href={note.input_reference_links} 
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="text-blue-600 hover:underline"
-                            title={note.input_reference_links}
-                          >
-                            链接
-                          </a>
-                        ) : (
-                          '-'
-                        )}
-                      </div>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      {note.input_reference_links ? (
+                        <a 
+                          href={note.input_reference_links} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 hover:bg-cyan-200 transition-colors"
+                          title={note.input_reference_links}
+                        >
+                          链接
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 text-sm">-</span>
+                      )}
                     </td>
                   )}
-                  <td className="py-4 px-4">
-                    <div className="text-gray-600 text-sm">
-                      {new Date(note.created_at).toLocaleString('zh-CN')}
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <div className="flex items-center">
+                      <Calendar className="w-4 h-4 mr-1 text-gray-400" />
+                      {new Date(note.created_at).toLocaleDateString('zh-CN')}
                     </div>
                   </td>
-                  <td className="py-4 px-4">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex items-center gap-2">
                       <button
                         onClick={() => handleView(note)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        className="text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-50"
                         title="查看详情"
                       >
                         <Eye className="w-4 h-4" />
@@ -274,14 +293,14 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
                         <>
                           <button
                             onClick={() => handleEdit(note)}
-                            className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors"
+                            className="text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50"
                             title="编辑"
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(note.id)}
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                            className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50"
                             title="删除"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -297,19 +316,32 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
         </div>
       )}
 
-      <div className="mt-6 flex items-center justify-between">
-        <div className="text-sm text-gray-500">
-          共 {filteredNotes.length} 条笔记
-        </div>
-        {showDetailed && (
-          <div className="flex items-center gap-4 text-sm text-gray-500">
-            <span>总记录数: {notes.length}</span>
-            <span>搜索结果: {filteredNotes.length}</span>
-            {notes.length > 0 && (
-              <span>最近生成: {new Date(notes[0].created_at).toLocaleDateString('zh-CN')}</span>
-            )}
+      {/* 底部统计信息 */}
+      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100 rounded-b-xl">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-1 text-sm text-gray-600">
+            <Tag className="w-4 h-4" />
+            <span>共 {filteredNotes.length} 条记录</span>
           </div>
-        )}
+          {showDetailed && (
+            <div className="flex items-center gap-4 text-sm text-gray-500">
+              <span className="flex items-center gap-1">
+                <FileText className="w-4 h-4" />
+                总数: {notes.length}
+              </span>
+              <span className="flex items-center gap-1">
+                <Search className="w-4 h-4" />
+                搜索: {filteredNotes.length}
+              </span>
+              {notes.length > 0 && (
+                <span className="flex items-center gap-1">
+                  <Calendar className="w-4 h-4" />
+                  最新: {new Date(notes[0].created_at).toLocaleDateString('zh-CN')}
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Modals */}

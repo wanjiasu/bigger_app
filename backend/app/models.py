@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, Text, DateTime, func
+from sqlalchemy import Column, Integer, String, Text, DateTime, func, JSON
 from app.db import Base
 
 class User(Base):
@@ -26,5 +26,16 @@ class XiaohongshuNote(Base):
     comment_guide = Column(Text, nullable=False)  # 评论区引导文案
     comment_questions = Column(Text, nullable=False)  # 评论区问题
     model = Column(String(50), nullable=True)  # 添加模型字段
+    created_at = Column(DateTime, default=func.now())
+    updated_at = Column(DateTime(timezone=True), onupdate=func.now())
+
+class ClientAccount(Base):
+    __tablename__ = "client_accounts"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    account_name = Column(String(100), nullable=False)  # 账号名称
+    account_type = Column(String(50), nullable=False)  # 账号类型
+    topic_keywords = Column(JSON, nullable=True)  # 常驻话题关键词，使用JSON类型存储数组
+    platform = Column(String(50), nullable=False)  # 发布平台
     created_at = Column(DateTime, default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
