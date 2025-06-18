@@ -9,11 +9,102 @@ from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 import os
 from dotenv import load_dotenv
+import asyncio
+from contextlib import asynccontextmanager
+from fastapi.responses import JSONResponse
+from sqlalchemy.exc import SQLAlchemyError
+import logging
 
 # 加载环境变量
 load_dotenv()
 
-app = FastAPI(title="小红书笔记生成器", description="基于多AI模型的小红书图文笔记生成工具")
+# 配置日志
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
+# 初始化AI服务 - 暂时注释掉重复的初始化
+# ai_service = AIService()
+
+def run_database_migration():
+    """运行数据库迁移"""
+    try:
+        from sqlalchemy import create_engine, text, inspect
+        from app.models import Base
+        from app.db import DATABASE_URL
+        
+        engine = create_engine(DATABASE_URL)
+        
+        # 创建所有表
+        Base.metadata.create_all(bind=engine)
+        logger.info("✅ 数据库表创建完成")
+        
+        # 检查并添加缺失的字段
+        inspector = inspect(engine)
+        
+        if 'xiaohongshu_notes' in inspector.get_table_names():
+            with engine.connect() as conn:
+                try:
+                    # 获取现有字段
+                    existing_columns = {col['name'] for col in inspector.get_columns('xiaohongshu_notes')}
+                    
+                    # 需要的字段
+                    required_columns = {
+                        'input_account_name': 'VARCHAR(100)',
+                        'input_account_type': 'VARCHAR(50)', 
+                        'input_topic_keywords': 'TEXT',
+                        'input_platform': 'VARCHAR(50)',
+                        'input_selected_account_id': 'INTEGER',
+                        'model': 'VARCHAR(50)',
+                        'updated_at': 'TIMESTAMP'
+                    }
+                    
+                    # 添加缺失的字段
+                    for column_name, column_type in required_columns.items():
+                        if column_name not in existing_columns:
+                            try:
+                                conn.execute(text(f"ALTER TABLE xiaohongshu_notes ADD COLUMN {column_name} {column_type}"))
+                                logger.info(f"✅ 成功添加字段: {column_name}")
+                            except Exception as e:
+                                logger.warning(f"⚠️  添加字段 {column_name} 失败: {e}")
+                    
+                    conn.commit()
+                    logger.info("✅ 数据库结构更新完成")
+                    
+                except Exception as e:
+                    logger.error(f"❌ 数据库迁移失败: {e}")
+                    conn.rollback()
+        
+    except Exception as e:
+        logger.error(f"❌ 数据库迁移异常: {e}")
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # 启动时执行
+    logger.info("🚀 应用启动中...")
+    
+    # 运行数据库迁移
+    run_database_migration()
+    
+    # 初始化AI服务
+    try:
+        # 确保ai_service已经初始化
+        if 'ai_service' in globals():
+            await ai_service.initialize()
+            logger.info("🤖 AI服务初始化完成")
+    except Exception as e:
+        logger.error(f"❌ AI服务初始化失败: {e}")
+    
+    yield
+    
+    # 关闭时执行
+    logger.info("👋 应用关闭中...")
+
+app = FastAPI(
+    title="小红书笔记生成器",
+    description="基于多AI模型的小红书图文笔记生成工具",
+    version="1.0.0",
+    lifespan=lifespan
+)
 
 # 添加跨域中间件
 app.add_middleware(

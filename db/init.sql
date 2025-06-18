@@ -38,9 +38,9 @@ CREATE TABLE IF NOT EXISTS xiaohongshu_notes (
     input_platform VARCHAR(50),
     input_selected_account_id INTEGER,
     note_title TEXT,
-    note_content TEXT NOT NULL,
-    comment_guide TEXT NOT NULL,
-    comment_questions TEXT NOT NULL,
+    note_content TEXT,
+    comment_guide TEXT,
+    comment_questions TEXT,
     model VARCHAR(50),
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP
