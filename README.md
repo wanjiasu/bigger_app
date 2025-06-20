@@ -72,14 +72,11 @@ docker-compose up --build
 
 ## 部署
 
-### 开发环境
+### 本地开发
 使用 `docker-compose.yml` 进行本地开发：
 ```bash
 docker-compose up --build
 ```
-
-### 生产环境
-TODO: 添加生产环境部署说明
 
 ## 贡献指南
 1. Fork 项目

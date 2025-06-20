@@ -87,10 +87,13 @@ async def lifespan(app: FastAPI):
     
     # 初始化AI服务
     try:
-        # 确保ai_service已经初始化
+        # 测试AI服务连接
         if 'ai_service' in globals():
-            await ai_service.initialize()
-            logger.info("🤖 AI服务初始化完成")
+            is_connected = await ai_service.test_connection()
+            if is_connected:
+                logger.info("🤖 AI服务连接测试成功")
+            else:
+                logger.warning("⚠️ AI服务连接测试失败")
     except Exception as e:
         logger.error(f"❌ AI服务初始化失败: {e}")
     
