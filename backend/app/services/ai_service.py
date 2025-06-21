@@ -15,9 +15,9 @@ class AIService:
     def __init__(self):
         """初始化AI服务"""
         # One-API配置
-        self.one_api_url = os.getenv("ONE_API_URL", "http://one-api:3000")
+        self.one_api_url = os.getenv("ONE_API_URL", "https://your-remote-oneapi-service.com").rstrip('/')
         self.api_key = os.getenv("ONE_API_KEY")
-        self.default_model = AIModel.DEEPSEEK_R1
+        self.default_model = AIModel.GPT_4O
 
         # 模型映射到One-API中的实际模型名称
         self.model_mapping = {

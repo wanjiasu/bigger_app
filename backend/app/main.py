@@ -42,7 +42,7 @@ def run_database_migration():
         inspector = inspect(engine)
         
         if 'xiaohongshu_notes' in inspector.get_table_names():
-            with engine.connect() as conn:
+            with engine.begin() as conn:
                 try:
                     # 获取现有字段
                     existing_columns = {col['name'] for col in inspector.get_columns('xiaohongshu_notes')}
@@ -67,12 +67,12 @@ def run_database_migration():
                             except Exception as e:
                                 logger.warning(f"⚠️  添加字段 {column_name} 失败: {e}")
                     
-                    conn.commit()
+                    # engine.begin() 会自动处理commit/rollback
                     logger.info("✅ 数据库结构更新完成")
                     
                 except Exception as e:
                     logger.error(f"❌ 数据库迁移失败: {e}")
-                    conn.rollback()
+                    # engine.begin() 会自动rollback
         
     except Exception as e:
         logger.error(f"❌ 数据库迁移异常: {e}")
