@@ -19,9 +19,9 @@ const getApiUrl = () => {
       return 'http://localhost:8000'
     }
     
-    // 其他情况使用当前host但端口改为8000
+    // 生产环境使用nginx代理路径（不加端口号）
     const protocol = window.location.protocol
-    return `${protocol}//${currentHost}:8000`
+    return `${protocol}//${currentHost}/api`
   }
   
   // 默认回退
