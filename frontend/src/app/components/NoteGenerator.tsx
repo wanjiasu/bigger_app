@@ -245,11 +245,11 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
 
   // 可用的模型列表 - 使用抽象名称隐藏真实模型
   const availableModels = [
-    { value: 'gpt-4o', label: '模型一', description: '平衡型', color: 'bg-blue-100 text-blue-700' },
-    { value: 'claude-3-5-sonnet-latest', label: '模型二', description: '创意型', color: 'bg-purple-100 text-purple-700' },
-    { value: 'claude-sonnet-4-20250514', label: '模型三', description: '专业型', color: 'bg-green-100 text-green-700' },
-    { value: 'deepseek-r1', label: '模型四', description: '推理型', color: 'bg-orange-100 text-orange-700' },
-    { value: 'glm-4', label: '模型五', description: '智能型', color: 'bg-pink-100 text-pink-700' }
+    { value: 'gpt-4o', label: '模型一' },
+    { value: 'claude-3-5-sonnet-latest', label: '模型二' },
+    { value: 'claude-sonnet-4-20250514', label: '模型三' },
+    { value: 'deepseek-r1', label: '模型四' },
+    { value: 'glm-4', label: '模型五' }
   ]
 
   const copyToClipboard = async (text: string) => {
@@ -1018,19 +1018,11 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                                   }}
                                   className="w-4 h-4 text-orange-500 rounded border-gray-300 focus:ring-orange-500 disabled:opacity-50"
                                 />
-                                <div className="flex-1">
-                                  <div className="flex items-center gap-2">
+                                                                  <div className="flex-1">
                                     <div className={`text-sm font-medium ${isSelected ? 'text-orange-700' : 'text-gray-800'}`}>
                                       {model.label}
                                     </div>
-                                    <span className={`text-xs px-2 py-0.5 rounded-full ${model.color}`}>
-                                      {model.description}
-                                    </span>
                                   </div>
-                                  {model.value === 'gpt-4o' && (
-                                    <div className="text-xs text-orange-500 mt-0.5">推荐使用</div>
-                                  )}
-                                </div>
                                 {isSelected && (
                                   <Check className="w-4 h-4 text-orange-500" />
                                 )}
