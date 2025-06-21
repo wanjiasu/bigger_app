@@ -5,6 +5,7 @@ import { NoteGenerator } from './components/NoteGenerator'
 import { NotesTable } from './components/NotesTable'
 import { ClientAccountTable } from './components/ClientAccountTable'
 import { FileText, Sparkles, BarChart3, Users, Settings, HelpCircle, Shield, TrendingUp } from 'lucide-react'
+import Image from 'next/image'
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState<'generate' | 'manage' | 'history' | 'account'>('generate')
@@ -39,14 +40,20 @@ export default function Home() {
         {/* Logo 区域 */}
         <div className="p-6 border-b border-gray-100">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-gradient-to-br from-pink-500 to-purple-600 rounded-lg flex items-center justify-center">
-              <Sparkles className="w-6 h-6 text-white" />
+            <div className="w-10 h-10 relative">
+              <Image 
+                src="/logo.png" 
+                alt="胜利手势logo" 
+                width={40} 
+                height={40} 
+                className="rounded-lg object-cover"
+              />
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-                智能内容平台
+                胜利手势
               </h1>
-              <p className="text-sm text-gray-500">管理系统</p>
+              <p className="text-sm text-gray-500">商业地产内容生产</p>
             </div>
           </div>
         </div>
@@ -117,7 +124,7 @@ export default function Home() {
               </h2>
               <p className="text-gray-600 mt-1">
                 {activeTab === 'generate' 
-                  ? '基于 DeepSeek AI 的智能小红书图文笔记生成工具' 
+                  ? '基于 DeepSeek AI 的智能商业地产内容生成工具' 
                   : activeTab === 'history'
                   ? '查看所有历史生成记录，包含详细参数和生成结果'
                   : activeTab === 'account'
