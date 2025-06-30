@@ -5,6 +5,7 @@ import { Eye, Edit, Trash2, Search, RefreshCw, FileText, Calendar, Tag } from 'l
 import axios from 'axios'
 import { NoteDetailModal } from './NoteDetailModal'
 import { EditNoteModal } from './EditNoteModal'
+import { useLanguage } from '../../contexts/LanguageContext'
 import { API_ENDPOINTS } from '../../config/api'
 
 interface Note {
@@ -38,6 +39,7 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
   const [editingNote, setEditingNote] = useState<Note | null>(null)
   const [showDetailModal, setShowDetailModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
+  const { t } = useLanguage()
 
   const fetchNotes = async () => {
     try {
@@ -49,7 +51,7 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
       setError('')
     } catch (err: any) {
       console.error('获取笔记失败:', err)
-      setError('获取笔记失败，请检查后端服务是否启动')
+      setError(t('notes.fetchFailed'))
     } finally {
       setLoading(false)
     }
@@ -60,14 +62,14 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
   }, [refreshTrigger])
 
   const handleDelete = async (id: number) => {
-    if (!confirm('确定要删除这条笔记吗？')) return
+    if (!confirm(t('notes.confirmDelete'))) return
 
     try {
       await axios.delete(API_ENDPOINTS.NOTES_DELETE(id))
       setNotes(notes.filter(note => note.id !== id))
     } catch (err: any) {
       console.error('删除失败:', err)
-      alert('删除失败，请重试')
+      alert(t('notes.deleteFailed'))
     }
   }
 
@@ -123,7 +125,7 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
               onClick={fetchNotes}
               className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all duration-200"
             >
-              重试
+              {t('common.retry')}
             </button>
           </div>
         </div>
@@ -138,12 +140,12 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
         <div className="flex items-center justify-between">
           <div>
             <h3 className="text-lg font-semibold text-gray-800">
-              {showDetailed ? '历史记录详情' : '笔记管理'}
+              {showDetailed ? t('notes.history') : t('notes.management')}
             </h3>
             <p className="text-sm text-gray-600 mt-1">
               {showDetailed 
-                ? '查看所有历史生成记录，包含详细参数和生成结果'
-                : '管理已生成的笔记内容'
+                ? t('notes.historyDesc')
+                : t('notes.managementDesc')
               }
             </p>
           </div>
@@ -152,7 +154,7 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
               <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
               <input
                 type="text"
-                placeholder="搜索笔记..."
+                placeholder={t('notes.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent text-sm"
@@ -161,7 +163,7 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
             <button
               onClick={fetchNotes}
               className="p-2 text-gray-600 hover:text-pink-500 transition-colors rounded-lg hover:bg-pink-50"
-              title="刷新"
+                              title={t('common.refresh')}
             >
               <RefreshCw className="w-5 h-5" />
             </button>
@@ -175,10 +177,10 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
           <div className="flex flex-col items-center">
             <FileText className="w-12 h-12 text-gray-300 mb-4" />
             <p className="text-lg font-medium">
-              {searchTerm ? '没有找到匹配的笔记' : '暂无笔记记录'}
+              {searchTerm ? t('notes.noSearchResults') : t('notes.noRecords')}
             </p>
             <p className="text-sm">
-              {searchTerm ? '尝试调整搜索条件' : '开始生成您的第一个笔记吧'}
+              {searchTerm ? t('notes.adjustSearch') : t('notes.noRecordsDesc')}
             </p>
           </div>
         </div>
@@ -190,22 +192,22 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
                 {showDetailed && (
                   <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">ID</th>
                 )}
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">标题</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">基本内容</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.title')}</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.basicContent')}</th>
                 {showDetailed && (
                   <>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">笔记目的</th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">近期热梗</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.notePurpose')}</th>
+                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.recentTrends')}</th>
                   </>
                 )}
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">内容类型</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">目标受众</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">写作风格</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.contentType')}</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.targetAudience')}</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.writingStyle')}</th>
                 {showDetailed && (
-                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">参考链接</th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.referenceLinks')}</th>
                 )}
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">创建时间</th>
-                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">操作</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.createdAt')}</th>
+                <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">{t('notes.actions')}</th>
               </tr>
             </thead>
             <tbody className="bg-white divide-y divide-gray-200">
@@ -267,7 +269,7 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
                           className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-cyan-100 text-cyan-800 hover:bg-cyan-200 transition-colors"
                           title={note.input_reference_links}
                         >
-                          链接
+                          {t('notes.linkText')}
                         </a>
                       ) : (
                         <span className="text-gray-400 text-sm">-</span>
@@ -285,7 +287,7 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
                       <button
                         onClick={() => handleView(note)}
                         className="text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-50"
-                        title="查看详情"
+                        title={t('common.view')}
                       >
                         <Eye className="w-4 h-4" />
                       </button>
@@ -294,14 +296,14 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
                           <button
                             onClick={() => handleEdit(note)}
                             className="text-green-600 hover:text-green-900 p-1 rounded-md hover:bg-green-50"
-                            title="编辑"
+                            title={t('common.edit')}
                           >
                             <Edit className="w-4 h-4" />
                           </button>
                           <button
                             onClick={() => handleDelete(note.id)}
                             className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50"
-                            title="删除"
+                            title={t('common.delete')}
                           >
                             <Trash2 className="w-4 h-4" />
                           </button>
@@ -321,22 +323,22 @@ export function NotesTable({ refreshTrigger, showDetailed = false }: NotesTableP
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-1 text-sm text-gray-600">
             <Tag className="w-4 h-4" />
-            <span>共 {filteredNotes.length} 条记录</span>
+            <span>{t('common.total')} {filteredNotes.length} {t('notes.totalRecords')}</span>
           </div>
           {showDetailed && (
             <div className="flex items-center gap-4 text-sm text-gray-500">
               <span className="flex items-center gap-1">
                 <FileText className="w-4 h-4" />
-                总数: {notes.length}
+                {t('common.total')}: {notes.length}
               </span>
               <span className="flex items-center gap-1">
                 <Search className="w-4 h-4" />
-                搜索: {filteredNotes.length}
+                {t('common.search')}: {filteredNotes.length}
               </span>
               {notes.length > 0 && (
                 <span className="flex items-center gap-1">
                   <Calendar className="w-4 h-4" />
-                  最新: {new Date(notes[0].created_at).toLocaleDateString('zh-CN')}
+                  {t('common.latest')}: {new Date(notes[0].created_at).toLocaleDateString('zh-CN')}
                 </span>
               )}
             </div>

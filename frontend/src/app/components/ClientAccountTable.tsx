@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import { Plus, Edit, Trash2, Tag } from 'lucide-react'
 import { API_BASE_URL } from '../../config/api'
+import { useLanguage } from '../../contexts/LanguageContext'
 
 interface ClientAccount {
   id: number
@@ -19,6 +20,7 @@ interface ClientAccountTableProps {
 }
 
 export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTableProps) {
+  const { t } = useLanguage()
   const [accounts, setAccounts] = useState<ClientAccount[]>([])
   const [loading, setLoading] = useState(true)
   const [showModal, setShowModal] = useState(false)
@@ -83,7 +85,7 @@ export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTablePro
   }
 
   const handleDelete = async (id: number) => {
-    if (confirm('确定要删除这个账号吗？')) {
+    if (confirm(t('accounts.confirmDelete'))) {
       try {
         const response = await fetch(`${API_BASE_URL}/client-accounts/${id}`, {
           method: 'DELETE',
@@ -111,15 +113,15 @@ export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTablePro
       <div className="p-6 border-b border-gray-100">
         <div className="flex items-center justify-between">
           <div>
-            <h3 className="text-lg font-semibold text-gray-800">账号信息管理</h3>
-            <p className="text-sm text-gray-600 mt-1">管理您的社交媒体账号信息</p>
+            <h3 className="text-lg font-semibold text-gray-800">{t('accounts.management')}</h3>
+            <p className="text-sm text-gray-600 mt-1">{t('accounts.description')}</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all duration-200 shadow-md hover:shadow-lg"
           >
             <Plus className="w-4 h-4" />
-            添加账号
+            {t('accounts.addAccount')}
           </button>
         </div>
       </div>
@@ -130,22 +132,22 @@ export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTablePro
           <thead className="bg-gray-50">
             <tr>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                账号名称
+                {t('accounts.accountName')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                账号类型
+                {t('accounts.accountType')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                常驻话题
+                {t('accounts.residentTopics')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                发布平台
+                {t('accounts.platform')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                创建时间
+                {t('accounts.createdAt')}
               </th>
               <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                操作
+                {t('accounts.actions')}
               </th>
             </tr>
           </thead>
@@ -155,8 +157,8 @@ export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTablePro
                 <td colSpan={6} className="px-6 py-12 text-center text-gray-500">
                   <div className="flex flex-col items-center">
                     <Tag className="w-12 h-12 text-gray-300 mb-4" />
-                    <p className="text-lg font-medium">暂无账号信息</p>
-                    <p className="text-sm">点击右上角"添加账号"按钮开始创建</p>
+                    <p className="text-lg font-medium">{t('accounts.noAccounts')}</p>
+                    <p className="text-sm">{t('accounts.noAccountsDesc')}</p>
                   </div>
                 </td>
               </tr>
@@ -197,14 +199,14 @@ export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTablePro
                     <div className="flex items-center gap-2">
                       <button
                         className="text-indigo-600 hover:text-indigo-900 p-1 rounded-md hover:bg-indigo-50"
-                        title="编辑"
+                        title={t('accounts.edit')}
                       >
                         <Edit className="w-4 h-4" />
                       </button>
                       <button
                         onClick={() => handleDelete(account.id)}
                         className="text-red-600 hover:text-red-900 p-1 rounded-md hover:bg-red-50"
-                        title="删除"
+                        title={t('accounts.delete')}
                       >
                         <Trash2 className="w-4 h-4" />
                       </button>
@@ -221,11 +223,11 @@ export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTablePro
       {showModal && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
           <div className="bg-white rounded-xl p-6 w-full max-w-md mx-4">
-            <h3 className="text-lg font-semibold text-gray-800 mb-4">添加新账号</h3>
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">{t('accounts.addNewAccount')}</h3>
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  账号名称
+                  {t('accounts.accountName')}
                 </label>
                 <input
                   type="text"
@@ -233,12 +235,12 @@ export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTablePro
                   value={formData.account_name}
                   onChange={(e) => setFormData({ ...formData, account_name: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-                  placeholder="输入账号名称"
+                  placeholder={t('accounts.accountNamePlaceholder')}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  账号类型
+                  {t('accounts.accountType')}
                 </label>
                 <input
                   type="text"
@@ -246,27 +248,27 @@ export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTablePro
                   value={formData.account_type}
                   onChange={(e) => setFormData({ ...formData, account_type: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-                  placeholder="输入账号类型，如：个人、企业、品牌、机构等"
+                  placeholder={t('accounts.accountTypePlaceholder')}
                 />
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  常驻话题关键词
+                  {t('accounts.topicKeywords')}
                 </label>
                 <textarea
                   value={formData.topic_keywords}
                   onChange={(e) => setFormData({ ...formData, topic_keywords: e.target.value })}
                   className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-pink-500"
-                  placeholder="用逗号分隔多个关键词，如：美食,旅行,生活,摄影,时尚,健身"
+                  placeholder={t('accounts.topicKeywordsPlaceholder')}
                   rows={3}
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  💡 提示：每个关键词用逗号分隔，可以输入多行
+                  {t('accounts.topicKeywordsTip')}
                 </p>
               </div>
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  发布平台
+                  {t('accounts.platform')}
                 </label>
                 <select
                   required
@@ -286,13 +288,13 @@ export function ClientAccountTable({ refreshTrigger = 0 }: ClientAccountTablePro
                   onClick={() => setShowModal(false)}
                   className="px-4 py-2 text-gray-600 hover:text-gray-800 transition-colors"
                 >
-                  取消
+                  {t('accounts.cancel')}
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 bg-gradient-to-r from-pink-500 to-purple-600 text-white rounded-lg hover:from-pink-600 hover:to-purple-700 transition-all duration-200"
                 >
-                  创建账号
+                  {t('accounts.createAccount')}
                 </button>
               </div>
             </form>

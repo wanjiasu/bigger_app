@@ -4,6 +4,8 @@ import { useState, useEffect } from 'react'
 import { NoteGenerator } from './components/NoteGenerator'
 import { NotesTable } from './components/NotesTable'
 import { ClientAccountTable } from './components/ClientAccountTable'
+import { LanguageSwitcher } from './components/LanguageSwitcher'
+import { useLanguage } from '../contexts/LanguageContext'
 import { FileText, Sparkles, BarChart3, Users, Settings, HelpCircle, Shield, TrendingUp } from 'lucide-react'
 import Image from 'next/image'
 
@@ -11,6 +13,7 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'generate' | 'manage' | 'history' | 'account'>('generate')
   const [refreshTrigger, setRefreshTrigger] = useState(0)
   const [loginTime, setLoginTime] = useState<string>('')
+  const { language, setLanguage, t } = useLanguage()
 
   useEffect(() => {
     setLoginTime(new Date().toLocaleDateString())
@@ -21,16 +24,16 @@ export default function Home() {
   }
 
   const sidebarItems = [
-    { id: 'account', label: '账号信息', icon: Users, active: activeTab === 'account', disabled: false },
-    { id: 'generate', label: '内容生成', icon: Sparkles, active: activeTab === 'generate' },
-    { id: 'history', label: '历史记录', icon: FileText, active: activeTab === 'history' },
-    { id: 'violation', label: '违规检测', icon: Shield, active: false, disabled: true },
-    { id: 'tracking', label: '数据追踪', icon: TrendingUp, active: false, disabled: true },
+    { id: 'account', label: t('nav.account'), icon: Users, active: activeTab === 'account', disabled: false },
+    { id: 'generate', label: t('nav.generate'), icon: Sparkles, active: activeTab === 'generate' },
+    { id: 'history', label: t('nav.history'), icon: FileText, active: activeTab === 'history' },
+    { id: 'violation', label: t('nav.violation'), icon: Shield, active: false, disabled: true },
+    { id: 'tracking', label: t('nav.tracking'), icon: TrendingUp, active: false, disabled: true },
   ]
 
   const bottomItems = [
-    { id: 'settings', label: '系统管理', icon: Settings, disabled: true },
-    { id: 'help', label: '帮助中心', icon: HelpCircle, disabled: true },
+    { id: 'settings', label: t('nav.settings'), icon: Settings, disabled: true },
+    { id: 'help', label: t('nav.help'), icon: HelpCircle, disabled: true },
   ]
 
   return (
@@ -51,9 +54,9 @@ export default function Home() {
             </div>
             <div>
               <h1 className="text-xl font-bold bg-gradient-to-r from-pink-500 to-purple-600 bg-clip-text text-transparent">
-                胜利手势
+                {t('app.title')}
               </h1>
-              <p className="text-sm text-gray-500">商业地产内容生产</p>
+              <p className="text-sm text-gray-500">{t('app.subtitle')}</p>
             </div>
           </div>
         </div>
@@ -66,7 +69,7 @@ export default function Home() {
                 key={item.id}
                 onClick={() => !item.disabled && (item.id === 'generate' || item.id === 'history' || item.id === 'account') && setActiveTab(item.id as 'generate' | 'manage' | 'history' | 'account')}
                 disabled={item.disabled}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 relative ${
+                className={`w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left transition-all duration-200 relative ${
                   item.active
                     ? 'bg-gradient-to-r from-pink-500 to-purple-600 text-white shadow-md'
                     : item.disabled
@@ -74,11 +77,11 @@ export default function Home() {
                     : 'text-gray-600 hover:bg-pink-50 hover:text-pink-600'
                 }`}
               >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium text-sm truncate flex-1">{item.label}</span>
                 {item.disabled && (
-                  <span className="ml-auto text-xs bg-gray-200 text-gray-500 px-2 py-1 rounded-full">
-                    待开发
+                  <span className="text-xs bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                    {t('nav.status.developing')}
                   </span>
                 )}
               </button>
@@ -93,12 +96,12 @@ export default function Home() {
               <button
                 key={item.id}
                 disabled={item.disabled}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-lg text-left transition-all duration-200 text-gray-400 cursor-not-allowed relative"
+                className="w-full flex items-center gap-2 px-3 py-2.5 rounded-lg text-left transition-all duration-200 text-gray-400 cursor-not-allowed relative"
               >
-                <item.icon className="w-5 h-5" />
-                <span className="font-medium">{item.label}</span>
-                <span className="ml-auto text-xs bg-gray-200 text-gray-500 px-2 py-1 rounded-full">
-                  待开发
+                <item.icon className="w-5 h-5 flex-shrink-0" />
+                <span className="font-medium text-sm truncate flex-1">{item.label}</span>
+                <span className="text-xs bg-gray-200 text-gray-500 px-1.5 py-0.5 rounded-full whitespace-nowrap flex-shrink-0">
+                  {t('nav.status.developing')}
                 </span>
               </button>
             ))}
@@ -114,27 +117,33 @@ export default function Home() {
             <div>
               <h2 className="text-2xl font-bold text-gray-800">
                 {activeTab === 'generate' 
-                  ? '内容生成' 
+                  ? t('page.generate.title')
                   : activeTab === 'history' 
-                  ? '历史记录' 
+                  ? t('page.history.title')
                   : activeTab === 'account'
-                  ? '账号信息'
-                  : '管理笔记'
+                  ? t('page.account.title')
+                  : t('page.generate.title')
                 }
               </h2>
               <p className="text-gray-600 mt-1">
                 {activeTab === 'generate' 
-                  ? '基于 DeepSeek AI 的智能商业地产内容生成工具' 
+                  ? t('page.generate.description')
                   : activeTab === 'history'
-                  ? '查看所有历史生成记录，包含详细参数和生成结果'
+                  ? t('page.history.description')
                   : activeTab === 'account'
-                  ? '管理您的社交媒体账号信息，包括账号类型和常驻话题'
-                  : '查看和管理已生成的笔记内容'
+                  ? t('page.account.description')
+                  : t('page.generate.description')
                 }
               </p>
             </div>
-            <div className="text-sm text-gray-500">
-              {loginTime && `最近登录时间: ${loginTime}`}
+            <div className="flex items-center gap-4">
+              <LanguageSwitcher 
+                currentLanguage={language} 
+                onLanguageChange={setLanguage} 
+              />
+              <div className="text-sm text-gray-500">
+                {loginTime && `${t('common.lastLogin')}: ${loginTime}`}
+              </div>
             </div>
           </div>
         </div>

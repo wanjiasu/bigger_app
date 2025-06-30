@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { Sparkles, Loader2, Send, ChevronDown, Settings, Target, TrendingUp, Users, FileText, Link, Smartphone, Heart, MessageCircle, Share, Bookmark, Check, Copy, Cpu, X } from 'lucide-react'
 import axios from 'axios'
+import { useLanguage } from '../../contexts/LanguageContext'
 import { API_ENDPOINTS } from '../../config/api'
 
 interface NoteGeneratorProps {
@@ -36,7 +37,7 @@ function XiaohongshuPreview({ note, copiedContent, copyingContent, copyToClipboa
       <div className="bg-black rounded-[2.5rem] p-2 w-full max-w-[300px] mx-auto">
         <div className="bg-white rounded-[2rem] h-[600px] p-4 flex flex-col items-center justify-center">
           <Smartphone className="w-12 h-12 text-gray-300 mb-4" />
-          <p className="text-gray-400 text-sm text-center">生成后将在此预览<br />小红书效果</p>
+          <p className="text-gray-400 text-sm text-center">{t('generator.previewDesc')}</p>
         </div>
       </div>
     )
@@ -171,6 +172,7 @@ function XiaohongshuPreview({ note, copiedContent, copyingContent, copyToClipboa
 }
 
 export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
+  const { t } = useLanguage()
   const [basicContent, setBasicContent] = useState('')
   const [showAdvanced, setShowAdvanced] = useState(true)
   
@@ -245,11 +247,11 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
 
   // 可用的模型列表 - 使用抽象名称隐藏真实模型
   const availableModels = [
-    { value: 'gpt-4o', label: '模型一' },
-    { value: 'claude-3-5-sonnet-latest', label: '模型二' },
-    { value: 'claude-sonnet-4-20250514', label: '模型三' },
-    { value: 'deepseek-r1', label: '模型四' },
-    { value: 'glm-4', label: '模型五' }
+    { value: 'gpt-4o', label: t('models.modelOne') },
+    { value: 'claude-3-5-sonnet-latest', label: t('models.modelTwo') },
+    { value: 'claude-sonnet-4-20250514', label: t('models.modelThree') },
+    { value: 'deepseek-r1', label: t('models.modelFour') },
+    { value: 'glm-4', label: t('models.modelFive') }
   ]
 
   const copyToClipboard = async (text: string) => {
@@ -354,7 +356,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
 
   const handleGenerate = async () => {
     if (!basicContent.trim()) {
-      setError('请输入基本内容')
+      setError(t('generator.inputRequired'))
       return
     }
 
@@ -387,11 +389,11 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
         // 只触发刷新，不跳转页面
         onNoteGenerated()
       } else {
-        setError('生成失败，请重试')
+        setError(t('generator.generateFailed'))
       }
     } catch (err: any) {
       console.error('生成笔记失败:', err)
-      setError(err.response?.data?.detail || '网络错误，请检查后端服务是否启动')
+      setError(err.response?.data?.detail || t('generator.networkError'))
     } finally {
       setIsLoading(false)
     }
@@ -450,12 +452,12 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                 </div>
                 <div>
                   <h3 className="text-lg font-semibold text-gray-800">
-                    {actualModels.length === 1 ? '生成结果' : '模型对比结果'}
+                    {actualModels.length === 1 ? t('generator.generationResults') : t('generator.modelComparison')}
                   </h3>
                   <p className="text-sm text-gray-600">
                     {actualModels.length === 1 
-                      ? 'AI 生成的内容已准备就绪' 
-                      : `${actualModels.length} 个模型的生成结果对比`
+                      ? t('generator.aiReady')
+                      : `${actualModels.length} ${t('generator.modelResults')}`
                     }
                   </p>
                 </div>
@@ -465,7 +467,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                 className="px-4 py-2 text-gray-600 hover:text-pink-600 transition-colors flex items-center gap-2 rounded-lg hover:bg-pink-50"
               >
                 <ChevronDown className="w-4 h-4 rotate-90" />
-                返回编辑
+                {t('generator.backToEdit')}
               </button>
             </div>
           </div>
@@ -493,11 +495,11 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                   <>
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-800">评论引导</h4>
+                        <h4 className="font-medium text-gray-800">{t('generator.commentGuide')}</h4>
                         <button
                           onClick={() => copyToClipboard(generatedNotes[actualModels[0]]?.comment_guide || '')}
                           className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                          title="复制评论引导"
+                          title={t('generator.copyCommentGuide')}
                         >
                           {copiedContent === generatedNotes[actualModels[0]]?.comment_guide ? (
                             <Check className="w-4 h-4 text-green-500" />
@@ -511,11 +513,11 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
 
                     <div className="bg-gray-50 rounded-lg p-4">
                       <div className="flex items-center justify-between mb-2">
-                        <h4 className="font-medium text-gray-800">评论问题</h4>
+                        <h4 className="font-medium text-gray-800">{t('generator.interactiveQuestions')}</h4>
                         <button
                           onClick={() => copyToClipboard(generatedNotes[actualModels[0]]?.comment_questions || '')}
                           className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                          title="复制评论问题"
+                          title={t('generator.copyCommentQuestions')}
                         >
                           {copiedContent === generatedNotes[actualModels[0]]?.comment_questions ? (
                             <Check className="w-4 h-4 text-green-500" />
@@ -531,7 +533,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                       onClick={() => {
                         const note = generatedNotes[actualModels[0]]
                         if (note) {
-                          const allContent = `${note.note_title}\n\n${note.note_content}\n\n评论引导：\n${note.comment_guide}\n\n评论问题：\n${note.comment_questions}`
+                          const allContent = `${note.note_title}\n\n${note.note_content}\n\n${t('generator.commentGuideLabel')}\n${note.comment_guide}\n\n${t('generator.commentQuestionsLabel')}\n${note.comment_questions}`
                           copyAllContent(allContent)
                         }
                       }}
@@ -546,17 +548,17 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                       {copyingContent === 'ALL_CONTENT' ? (
                         <>
                           <Loader2 className="w-4 h-4 animate-spin" />
-                          复制中...
+                          {t('generator.copying')}
                         </>
                       ) : allContentCopied ? (
                         <>
                           <Check className="w-4 h-4" />
-                          复制成功！
+                          {t('generator.copySuccess')}
                         </>
                       ) : (
                         <>
                           <Copy className="w-4 h-4" />
-                          复制全部内容
+                          {t('generator.copyAllContent')}
                         </>
                       )}
                     </button>
@@ -569,7 +571,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
             <div className="space-y-8">
               <div className="text-center">
                 <p className="text-sm text-gray-500">
-                  已选择 {actualModels.length} 个模型进行对比
+                  {t('generator.modelsSelected')} {actualModels.length} {t('generator.modelsComparison')}
                 </p>
               </div>
 
@@ -584,7 +586,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                         <h4 className="font-medium text-gray-800">{modelInfo?.label || model}</h4>
                         {note && (
                           <span className="text-xs text-green-500 bg-green-50 px-2 py-1 rounded-full">
-                            生成成功
+                            {t('generator.generateSuccess')}
                           </span>
                         )}
                       </div>
@@ -600,11 +602,11 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                         <div className="mt-4 space-y-3">
                           <div className="bg-white rounded-lg p-3">
                             <div className="flex items-center justify-between mb-1">
-                              <div className="text-xs text-gray-600">评论引导</div>
+                              <div className="text-xs text-gray-600">{t('generator.commentGuide')}</div>
                               <button
                                 onClick={() => copyToClipboard(note.comment_guide)}
                                 className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                                title="复制评论引导"
+                                title={t('generator.copyCommentGuide')}
                               >
                                 {copiedContent === note.comment_guide ? (
                                   <Check className="w-3 h-3 text-green-500" />
@@ -618,11 +620,11 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
 
                           <div className="bg-white rounded-lg p-3">
                             <div className="flex items-center justify-between mb-1">
-                              <div className="text-xs text-gray-600">评论问题</div>
+                              <div className="text-xs text-gray-600">{t('generator.interactiveQuestions')}</div>
                               <button
                                 onClick={() => copyToClipboard(note.comment_questions)}
                                 className="p-1 text-gray-400 hover:text-gray-600 transition-colors"
-                                title="复制评论问题"
+                                title={t('generator.copyCommentQuestions')}
                               >
                                 {copiedContent === note.comment_questions ? (
                                   <Check className="w-3 h-3 text-green-500" />
@@ -648,7 +650,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                         const note = generatedNotes[model]
                         const modelInfo = availableModels.find(m => m.value === model)
                         if (note) {
-                          return `=== ${modelInfo?.label || model} ===\n\n${note.note_title}\n\n${note.note_content}\n\n评论引导：\n${note.comment_guide}\n\n评论问题：\n${note.comment_questions}\n\n`
+                          return `=== ${modelInfo?.label || model} ===\n\n${note.note_title}\n\n${note.note_content}\n\n${t('generator.commentGuideLabel')}\n${note.comment_guide}\n\n${t('generator.commentQuestionsLabel')}\n${note.comment_questions}\n\n`
                         }
                         return ''
                       }).join('\n')
@@ -665,17 +667,17 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                     {copyingContent === 'ALL_CONTENT' ? (
                       <>
                         <Loader2 className="w-4 h-4 animate-spin" />
-                        复制中...
+                        {t('generator.copying')}
                       </>
                     ) : allContentCopied ? (
                       <>
                         <Check className="w-4 h-4" />
-                        复制成功！({actualModels.length} 个模型)
+                        {t('generator.copySuccessWithModels').replace('{count}', actualModels.length.toString())}
                       </>
                     ) : (
                       <>
                         <Copy className="w-4 h-4" />
-                        复制所有模型生成结果
+                        {t('generator.copyAllModelsResult')}
                       </>
                     )}
                   </button>
@@ -700,8 +702,8 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
               <Sparkles className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-800">智能内容生成</h3>
-              <p className="text-sm text-gray-600">基于 DeepSeek AI 的智能小红书图文笔记生成工具</p>
+              <h3 className="text-lg font-semibold text-gray-800">{t('generator.title')}</h3>
+              <p className="text-sm text-gray-600">{t('generator.subtitle')}</p>
             </div>
           </div>
         </div>
@@ -713,19 +715,19 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
           <div className="bg-gradient-to-r from-pink-50 to-purple-50 rounded-xl p-6 border border-pink-100">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="w-5 h-5 text-pink-500" />
-              <h3 className="text-base font-semibold text-gray-800">基本内容</h3>
-              <span className="text-xs text-red-500 bg-red-100 px-2 py-1 rounded-full">必填</span>
+              <h3 className="text-base font-semibold text-gray-800">{t('generator.basicContent')}</h3>
+              <span className="text-xs text-red-500 bg-red-100 px-2 py-1 rounded-full">{t('generator.basicContentRequired')}</span>
             </div>
             <textarea
               value={basicContent}
               onChange={(e) => setBasicContent(e.target.value)}
-              placeholder="请详细描述您想要生成的内容，包括主题、要点、风格等..."
+              placeholder={t('generator.basicContentPlaceholder')}
               className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent resize-none bg-white"
               rows={4}
             />
             <p className="text-xs text-gray-600 mt-2 flex items-center gap-1">
               <span>💡</span>
-              描述越详细，AI 生成的内容越符合您的需求
+              {t('generator.basicContentTip')}
             </p>
           </div>
 
@@ -738,9 +740,9 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
               className="flex items-center gap-2 text-gray-600 hover:text-pink-600 transition-colors p-3 rounded-lg hover:bg-pink-50 w-full"
             >
               <Settings className="w-5 h-5" />
-              <span className="text-sm font-medium">高级参数设置</span>
+              <span className="text-sm font-medium">{t('generator.advancedSettings')}</span>
               <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full ml-auto mr-2">
-                {showAdvanced ? '收起' : '展开'}
+                {showAdvanced ? t('generator.collapse') : t('generator.expand')}
               </span>
               <ChevronDown 
                 className={`w-4 h-4 transition-transform ${showAdvanced ? 'rotate-180' : ''}`} 
@@ -755,12 +757,12 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
             <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
                 <Users className="w-5 h-5 text-blue-500" />
-                <h3 className="text-base font-semibold text-gray-800">账号信息</h3>
-                <span className="text-xs text-gray-500 bg-blue-50 px-2 py-1 rounded-full">个性化设置</span>
+                <h3 className="text-base font-semibold text-gray-800">{t('generator.accountInfo')}</h3>
+                <span className="text-xs text-gray-500 bg-blue-50 px-2 py-1 rounded-full">{t('generator.accountInfoDesc')}</span>
               </div>
               <div className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 block">选择账号</label>
+                  <label className="text-sm font-medium text-gray-700 block">{t('generator.selectAccount')}</label>
                   <select
                     value={selectedAccountId || ''}
                     onChange={(e) => {
@@ -780,34 +782,34 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                     }}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
                   >
-                    <option value="">请选择已存储的账号（可选）</option>
+                    <option value="">{t('generator.selectAccountPlaceholder')}</option>
                     {storedAccounts.map((account) => (
                       <option key={account.id} value={account.id}>
                         {account.account_name} ({account.account_type} - {account.platform})
                       </option>
                     ))}
                   </select>
-                  <p className="text-xs text-gray-500">💡 选择账号后将使用该账号的话题关键词优化生成内容</p>
+                  <p className="text-xs text-gray-500">💡 {t('generator.selectAccountTip')}</p>
                 </div>
 
                 {selectedAccountId && (
                   <div className="bg-blue-50 rounded-lg p-4 border border-blue-200">
                     <h4 className="text-sm font-medium text-gray-800 mb-2 flex items-center gap-2">
                       <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                      当前选中账号
+                      {t('generator.currentSelectedAccount')}
                     </h4>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-600">账号名称：</span>
+                        <span className="text-gray-600">{t('generator.accountName')}</span>
                         <span className="font-medium text-blue-700">{accountInfo.account_name}</span>
                       </div>
                       <div className="flex items-center gap-2">
-                        <span className="text-gray-600">账号类型：</span>
+                        <span className="text-gray-600">{t('generator.accountType')}</span>
                         <span className="font-medium text-blue-700">{accountInfo.account_type}</span>
                       </div>
                       <div className="md:col-span-2 flex items-start gap-2">
-                        <span className="text-gray-600 mt-0.5">常驻话题：</span>
-                        <span className="font-medium text-blue-700 flex-1">{accountInfo.topic_keywords || '未设置'}</span>
+                        <span className="text-gray-600 mt-0.5">{t('generator.topicKeywords')}</span>
+                        <span className="font-medium text-blue-700 flex-1">{accountInfo.topic_keywords || t('generator.notSet')}</span>
                       </div>
                     </div>
                   </div>
@@ -819,51 +821,51 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
             <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
                 <Target className="w-5 h-5 text-green-500" />
-                <h3 className="text-base font-semibold text-gray-800">内容定位</h3>
-                <span className="text-xs text-gray-500 bg-green-50 px-2 py-1 rounded-full">核心设置</span>
+                <h3 className="text-base font-semibold text-gray-800">{t('generator.contentPositioning')}</h3>
+                <span className="text-xs text-gray-500 bg-green-50 px-2 py-1 rounded-full">{t('generator.contentPositioningDesc')}</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 block">笔记目的</label>
+                  <label className="text-sm font-medium text-gray-700 block">{t('generator.notePurpose')}</label>
                   <select
                     value={notePurpose}
                     onChange={(e) => setNotePurpose(e.target.value)}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all duration-200 bg-white"
                   >
-                    <option value="">请选择笔记目的</option>
-                    <option value="流量互动">🔥 流量互动</option>
-                    <option value="引导到店">🏪 引导到店</option>
-                    <option value="拉动销售">💰 拉动销售</option>
-                    <option value="传播造势">📢 传播造势</option>
+                    <option value="">{t('generator.pleaseSelectNotePurpose')}</option>
+                    <option value="流量互动">{t('options.trafficInteraction')}</option>
+                    <option value="引导到店">{t('options.guideToStore')}</option>
+                    <option value="拉动销售">{t('options.driveSales')}</option>
+                    <option value="传播造势">{t('options.brandPromotion')}</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 block">内容类型</label>
+                  <label className="text-sm font-medium text-gray-700 block">{t('generator.contentType')}</label>
                   <select
                     value={contentType}
                     onChange={(e) => setContentType(e.target.value)}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-pink-500 focus:border-transparent transition-all duration-200 bg-white"
                   >
-                    <option value="">请选择内容类型</option>
-                    <option value="明星/IP联动">⭐ 明星/IP联动</option>
-                    <option value="节庆/事件营销">🎉 节庆/事件营销</option>
-                    <option value="新店/促销种草">🛍️ 新店/促销种草</option>
-                    <option value="用户UGC共创">👥 用户UGC共创</option>
-                    <option value="休闲/玩乐/购物种草">🎮 休闲/玩乐/购物种草</option>
-                    <option value="品牌宣传">📝 品牌宣传</option>
-                    <option value="通知公告">📋 通知公告</option>
+                    <option value="">{t('generator.pleaseSelectContentType')}</option>
+                    <option value="明星/IP联动">{t('options.celebrityIP')}</option>
+                    <option value="节庆/事件营销">{t('options.festivalEvent')}</option>
+                    <option value="新店/促销种草">{t('options.newStorePromotion')}</option>
+                    <option value="用户UGC共创">{t('options.userUGC')}</option>
+                    <option value="休闲/玩乐/购物种草">{t('options.leisureShopping')}</option>
+                    <option value="品牌宣传">{t('options.brandAdvertising')}</option>
+                    <option value="通知公告">{t('options.announcement')}</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 block">目标受众</label>
+                  <label className="text-sm font-medium text-gray-700 block">{t('generator.targetAudience')}</label>
                   <select
                     value={targetAudience}
                     onChange={(e) => setTargetAudience(e.target.value)}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent transition-all duration-200 bg-white"
                   >
-                    <option value="">请选择目标受众</option>
+                    <option value="">{t('generator.pleaseSelectTargetAudience')}</option>
                     <option value="购物爱好者">🛒 购物爱好者</option>
                     <option value="实用主义者">⚡ 实用主义者</option>
                     <option value="价格敏感者">💸 价格敏感者</option>
@@ -883,41 +885,41 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
             <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
                 <FileText className="w-5 h-5 text-purple-500" />
-                <h3 className="text-base font-semibold text-gray-800">内容风格</h3>
-                <span className="text-xs text-gray-500 bg-purple-50 px-2 py-1 rounded-full">表达方式</span>
+                <h3 className="text-base font-semibold text-gray-800">{t('generator.contentStyle')}</h3>
+                <span className="text-xs text-gray-500 bg-purple-50 px-2 py-1 rounded-full">{t('generator.contentStyleDesc')}</span>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 block">写作风格</label>
+                  <label className="text-sm font-medium text-gray-700 block">{t('generator.writingStyle')}</label>
                   <select
                     value={writingStyle}
                     onChange={(e) => setWritingStyle(e.target.value)}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent transition-all duration-200 bg-white"
                   >
-                    <option value="">请选择写作风格</option>
-                    <option value="口语化">💬 口语化</option>
-                    <option value="正式">📋 正式</option>
-                    <option value="热情">🔥 热情</option>
-                    <option value="简洁">⚡ 简洁</option>
-                    <option value="礼貌">🙏 礼貌</option>
-                    <option value="高情商">💡 高情商</option>
-                    <option value="抒情">🎭 抒情</option>
-                    <option value="诙谐">😄 诙谐</option>
-                    <option value="夸张/情绪化">🎪 夸张/情绪化</option>
-                    <option value="幽默">😂 幽默</option>
+                    <option value="">{t('generator.pleaseSelectWritingStyle')}</option>
+                    <option value="口语化">{t('options.colloquial')}</option>
+                    <option value="正式">{t('options.formal')}</option>
+                    <option value="热情">{t('options.enthusiastic')}</option>
+                    <option value="简洁">{t('options.concise')}</option>
+                    <option value="礼貌">{t('options.polite')}</option>
+                    <option value="高情商">{t('options.highEQ')}</option>
+                    <option value="抒情">{t('options.lyrical')}</option>
+                    <option value="诙谐">{t('options.witty')}</option>
+                    <option value="夸张/情绪化">{t('options.exaggerated')}</option>
+                    <option value="幽默">{t('options.humorous')}</option>
                   </select>
                 </div>
 
                 <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700 block">近期热梗</label>
+                  <label className="text-sm font-medium text-gray-700 block">{t('generator.recentTrends')}</label>
                   <input
                     type="text"
                     value={recentTrends}
                     onChange={(e) => setRecentTrends(e.target.value)}
-                    placeholder="例如：双十一、春节、热门话题..."
+                    placeholder={t('generator.trendExample')}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent transition-all duration-200 bg-white"
                   />
-                  <p className="text-xs text-gray-500">💡 输入当前热门话题，让内容更贴近时事</p>
+                  <p className="text-xs text-gray-500">💡 {t('generator.recentTrendsPlaceholder')}</p>
                 </div>
               </div>
             </div>
@@ -926,17 +928,17 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
             <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
               <div className="flex items-center gap-2 mb-4 pb-2 border-b border-gray-100">
                 <Cpu className="w-5 h-5 text-orange-500" />
-                <h3 className="text-base font-semibold text-gray-800">技术设置</h3>
-                <span className="text-xs text-gray-500 bg-orange-50 px-2 py-1 rounded-full">高级选项</span>
+                <h3 className="text-base font-semibold text-gray-800">{t('generator.techSettings')}</h3>
+                <span className="text-xs text-gray-500 bg-orange-50 px-2 py-1 rounded-full">{t('generator.techSettingsDesc')}</span>
               </div>
               
               <div className="space-y-5">
                 {/* AI 模型选择 */}
                 <div className="space-y-3">
                   <div className="flex items-center justify-between">
-                    <label className="text-sm font-medium text-gray-700">AI 模型选择</label>
+                    <label className="text-sm font-medium text-gray-700">{t('generator.modelSelection')}</label>
                     <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-full">
-                      已选择 {selectedModels.length}/3 个模型
+                      {t('generator.modelsSelected')} {selectedModels.length}/3 {t('generator.modelCount')}
                     </span>
                   </div>
                   
@@ -950,7 +952,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                       <div className="flex items-center justify-between">
                         <div className="flex-1">
                           {selectedModels.length === 0 ? (
-                            <span className="text-gray-500">请选择AI模型...</span>
+                            <span className="text-gray-500">{t('generator.selectAIModel')}</span>
                           ) : (
                             <div className="flex flex-wrap gap-1">
                               {selectedModels.map((modelValue) => {
@@ -1035,7 +1037,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                           <div className="border-t border-gray-100 p-3 bg-orange-50">
                             <div className="flex items-center gap-2">
                               <span className="text-orange-500">⚠️</span>
-                              <p className="text-xs text-orange-600">已达到最大选择数量（3个模型）</p>
+                              <p className="text-xs text-orange-600">{t('generator.maxModelsReached')}</p>
                             </div>
                           </div>
                         )}
@@ -1047,7 +1049,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                   {selectedModels.length === 0 && (
                     <div className="flex items-center gap-2 p-3 bg-blue-50 rounded-lg">
                       <span className="text-blue-500">💡</span>
-                      <p className="text-sm text-blue-600">建议选择1-3个模型进行对比，获得更好的生成效果</p>
+                      <p className="text-sm text-blue-600">{t('generator.modelRecommendation')}</p>
                     </div>
                   )}
                 </div>
@@ -1056,18 +1058,18 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
                 <div className="space-y-2">
                   <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
                     <Link className="w-4 h-4 text-cyan-500" />
-                    参考链接
+                    {t('generator.referenceLinks')}
                   </label>
                   <input
                     type="text"
                     value={referenceLinks}
                     onChange={(e) => setReferenceLinks(e.target.value)}
-                    placeholder="可输入参考链接，多个链接用逗号分隔..."
+                    placeholder={t('generator.referenceLinkPlaceholder')}
                     className="w-full px-3 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent transition-all duration-200 bg-white"
                   />
                   <p className="text-xs text-gray-500 flex items-center gap-1">
                     <span>ℹ️</span>
-                    参考链接暂时仅作记录，不参与实际生成
+                    {t('generator.referenceLinksTip')}
                   </p>
                 </div>
               </div>
@@ -1097,7 +1099,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
             <div className="bg-green-50 border border-green-200 rounded-lg p-4">
               <div className="flex items-center gap-2">
                 <Check className="w-5 h-5 text-green-500" />
-                <p className="text-green-600 font-medium">内容已成功复制到剪贴板！</p>
+                <p className="text-green-600 font-medium">{t('generator.contentCopiedSuccess')}</p>
               </div>
             </div>
           )}
@@ -1114,12 +1116,12 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
               {isLoading ? (
                 <>
                   <Loader2 className="w-4 h-4 animate-spin" />
-                  生成中...
+                  {t('generator.generating')}
                 </>
               ) : (
                 <>
                   <Send className="w-4 h-4" />
-                  开始生成 ({actualModels.length} 个模型)
+                  {t('generator.startGenerate')} ({actualModels.length} {t('generator.modelCount')})
                 </>
               )}
             </button>
@@ -1128,7 +1130,7 @@ export function NoteGenerator({ onNoteGenerated }: NoteGeneratorProps) {
               onClick={handleReset}
               className="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg font-medium hover:bg-gray-100 transition-all duration-200 bg-white shadow-sm"
             >
-              重置
+              {t('common.reset')}
             </button>
           </div>
         </div>
