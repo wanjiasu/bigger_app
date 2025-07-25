@@ -2,9 +2,10 @@ from fastapi import FastAPI, Depends, HTTPException
 from sqlalchemy.orm import Session
 from app.db import Base, engine, SessionLocal
 from app.models import User, XiaohongshuNote, ClientAccount
-from app.schemas import UserCreate, UserOut, NoteGenerateRequest, NoteCreate, NoteUpdate, NoteOut, ClientAccountCreate
+from app.schemas import UserCreate, UserOut, NoteGenerateRequest, NoteCreate, NoteUpdate, NoteOut, ClientAccountCreate, LawnMowerContentRequest, LawnMowerContentResponse
 from app import schemas, models
 from app.services.ai_service import ai_service
+from app.services.lawn_mower_service import LawnMowerService
 from fastapi.middleware.cors import CORSMiddleware
 from typing import List
 import os
@@ -14,6 +15,7 @@ from contextlib import asynccontextmanager
 from fastapi.responses import JSONResponse
 from sqlalchemy.exc import SQLAlchemyError
 import logging
+import json
 
 # 加载环境变量
 load_dotenv()
@@ -24,6 +26,9 @@ logger = logging.getLogger(__name__)
 
 # 初始化AI服务 - 暂时注释掉重复的初始化
 # ai_service = AIService()
+
+# 初始化割草机服务
+lawn_mower_service = LawnMowerService()
 
 def run_database_migration():
     """运行数据库迁移"""
@@ -117,6 +122,26 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# 获取当前文件的目录路径
+current_dir = os.path.dirname(os.path.abspath(__file__))
+
+@app.get("/api/lawn-mower/products")
+async def get_lawn_mower_products():
+    try:
+        # 构建product_data.json的完整路径
+        json_path = os.path.join(current_dir, "data", "product_data.json")
+        
+        # 读取JSON文件
+        with open(json_path, "r", encoding="utf-8") as f:
+            data = json.load(f)
+        return data
+    except FileNotFoundError:
+        raise HTTPException(status_code=404, detail="Product data file not found")
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Error parsing product data file")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 # 初始化数据库表
 Base.metadata.create_all(bind=engine)
@@ -400,4 +425,61 @@ def delete_client_account(account_id: int, db: Session = Depends(get_db)):
 @app.get("/")
 def root():
     return {"message": "小红书笔记生成器 API", "docs": "/docs"}
+
+# 割草机内容生成接口
+@app.post("/api/lawn-mower/generate", response_model=LawnMowerContentResponse)
+async def generate_lawn_mower_content(request: LawnMowerContentRequest):
+    """生成割草机推广内容"""
+    try:
+        # 处理多模型生成
+        all_results = []
+        for model in request.ai_model:
+            try:
+                result = await lawn_mower_service.generate_lawn_mower_content(
+                    spu=request.spu,
+                    sku=request.sku,
+                    language=request.language,
+                    target_platform=request.target_platform,
+                    opening_hook=request.opening_hook,
+                    narrative_perspective=request.narrative_perspective,
+                    content_logic=request.content_logic,
+                    value_proposition=request.value_proposition,
+                    key_selling_points=request.key_selling_points,
+                    specific_scenario=request.specific_scenario,
+                    user_persona=request.user_persona,
+                    content_style=request.content_style,
+                    holiday_season=request.holiday_season,
+                    ai_model=[model]  # 单个模型
+                )
+                
+                if result.get("success"):
+                    result_data = result.get("data", {})
+                    result_data["model"] = model
+                    all_results.append(result_data)
+                    
+            except Exception as e:
+                logger.error(f"模型 {model} 生成失败: {str(e)}")
+                continue
+        
+        if not all_results:
+            return LawnMowerContentResponse(
+                success=False,
+                error="所有模型生成均失败"
+            )
+        
+        # 返回第一个成功的结果，但包含所有模型的信息
+        return LawnMowerContentResponse(
+            success=True,
+            data={
+                "results": all_results,
+                "models_used": [result.get("model") for result in all_results]
+            }
+        )
+        
+    except Exception as e:
+        logger.error(f"割草机内容生成失败: {str(e)}")
+        return LawnMowerContentResponse(
+            success=False,
+            error=f"生成失败: {str(e)}"
+        )
 

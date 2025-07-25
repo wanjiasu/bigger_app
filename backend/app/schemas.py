@@ -100,3 +100,25 @@ class ClientAccount(ClientAccountBase):
 
     class Config:
         from_attributes = True
+
+# 割草机内容生成相关Schema
+class LawnMowerContentRequest(BaseModel):
+    spu: str
+    sku: Optional[str] = None  # SKU现在是可选的
+    language: str = "chinese"  # chinese/english
+    target_platform: str = "Facebook"  # Facebook/小红书等
+    opening_hook: str
+    narrative_perspective: str
+    content_logic: str
+    value_proposition: str
+    key_selling_points: str
+    specific_scenario: str
+    user_persona: str
+    content_style: str
+    holiday_season: Optional[str] = None
+    ai_model: List[str]  # 支持多个AI模型
+
+class LawnMowerContentResponse(BaseModel):
+    success: bool
+    data: Optional[dict] = None
+    error: Optional[str] = None
