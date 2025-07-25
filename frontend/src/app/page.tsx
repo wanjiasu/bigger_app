@@ -5,6 +5,7 @@ import { NoteGenerator } from './components/NoteGenerator'
 import { NotesTable } from './components/NotesTable'
 import { ClientAccountTable } from './components/ClientAccountTable'
 import { LanguageSwitcher } from './components/LanguageSwitcher'
+import { LawnMowerGenerator } from './components/LawnMowerGenerator'
 import { useLanguage } from '../contexts/LanguageContext'
 import { FileText, Sparkles, BarChart3, Users, Settings, HelpCircle, Shield, TrendingUp, ChevronDown, ChevronRight, PenTool } from 'lucide-react'
 import Image from 'next/image'
@@ -213,13 +214,7 @@ export default function Home() {
             {activeTab === 'generate' ? (
               <NoteGenerator onNoteGenerated={handleNoteGenerated} />
             ) : activeTab === 'generate-advanced' ? (
-              <div className="bg-white rounded-xl shadow-sm p-8 text-center">
-                <div className="w-16 h-16 bg-gradient-to-br from-pink-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <PenTool className="w-8 h-8 text-white" />
-                </div>
-                <h3 className="text-xl font-semibold text-gray-800 mb-2">割草机-工作流</h3>
-                <p className="text-gray-600">专业的割草机产品内容生成工作流正在开发中，敬请期待。</p>
-              </div>
+              <LawnMowerGenerator />
             ) : activeTab === 'history' ? (
               <NotesTable refreshTrigger={refreshTrigger} showDetailed={true} />
             ) : activeTab === 'account' ? (

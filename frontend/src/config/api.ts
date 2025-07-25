@@ -42,6 +42,10 @@ export const API_ENDPOINTS = {
   // 用户相关
   USERS_LIST: `${API_BASE_URL}/users/`,
   USERS_CREATE: `${API_BASE_URL}/users/`,
+  
+  // 割草机相关
+  LAWN_MOWER_PRODUCTS: `${API_BASE_URL}/api/lawn-mower/products`,
+  LAWN_MOWER_GENERATE: `${API_BASE_URL}/api/lawn-mower/generate`,
 }
 
 console.log('API Base URL:', API_BASE_URL)
