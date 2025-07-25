@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useLanguage } from '../../contexts/LanguageContext'
 import { 
   PenTool, 
@@ -92,6 +92,11 @@ export function LawnMowerGenerator() {
   const [modelDropdownOpen, setModelDropdownOpen] = useState(false)
   const [sellingPointDropdownOpen, setSellingPointDropdownOpen] = useState(false)
   const [scenarioDropdownOpen, setScenarioDropdownOpen] = useState(false)
+
+  // 添加返回编辑功能
+  const handleBackToEdit = () => {
+    setGeneratedContent(null)
+  }
 
   // 加载产品数据
   useEffect(() => {
@@ -422,6 +427,24 @@ export function LawnMowerGenerator() {
     setIsOpen: (open: boolean) => void
     colorScheme?: 'blue' | 'purple' | 'pink'
   }) => {
+    const dropdownRef = useRef<HTMLDivElement>(null)
+
+    useEffect(() => {
+      const handleClickOutside = (event: MouseEvent) => {
+        if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+          setIsOpen(false)
+        }
+      }
+
+      if (isOpen) {
+        document.addEventListener('mousedown', handleClickOutside)
+      }
+
+      return () => {
+        document.removeEventListener('mousedown', handleClickOutside)
+      }
+    }, [isOpen, setIsOpen])
+
     const colorClasses = {
       blue: 'bg-blue-50 text-blue-700 border-blue-200',
       purple: 'bg-purple-50 text-purple-700 border-purple-200',
@@ -434,7 +457,7 @@ export function LawnMowerGenerator() {
           {Icon && <Icon className="w-3 h-3 text-gray-600" />}
           {label}
         </label>
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
           <button
             type="button"
             className="w-full px-3 py-2.5 text-left bg-white border border-gray-200 rounded-xl shadow-sm
@@ -452,15 +475,16 @@ export function LawnMowerGenerator() {
                         className={`inline-flex items-center gap-1 px-2 py-0.5 text-xs font-medium rounded-full border ${colorClasses[colorScheme]}`}
                       >
                         <span className="truncate max-w-[80px]">{item}</span>
-                        <button
+                        <div
+                          role="button"
                           onClick={(e) => {
                             e.stopPropagation()
                             onRemove(item)
                           }}
-                          className="hover:bg-opacity-20 hover:bg-gray-800 rounded-full p-0.5 transition-colors flex-shrink-0"
+                          className="hover:bg-opacity-20 hover:bg-gray-800 rounded-full p-0.5 transition-colors flex-shrink-0 cursor-pointer"
                         >
                           ×
-                        </button>
+                        </div>
                       </span>
                     ))}
                   </div>
@@ -512,259 +536,258 @@ export function LawnMowerGenerator() {
       </div>
 
       <div className="relative max-w-6xl mx-auto px-4 py-6">
-        {/* Header */}
-        <div className="text-center mb-6">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl mb-3 shadow-md">
-            <Scissors className="w-6 h-6 text-white" />
-          </div>
-          <h1 className="text-2xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-2">
-            割草机内容生成工作流
-          </h1>
-          <p className="text-sm text-gray-600 max-w-xl mx-auto">
-            基于AI的专业割草机产品内容生成工具，为您的营销策略提供智能化解决方案
-          </p>
-        </div>
-
-        {/* 表单区域 */}
-        <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 mb-4">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            
-            {/* 产品信息 */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                  <Settings className="w-4 h-4 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800">产品信息</h3>
-              </div>
+        {!generatedContent ? (
+          // 表单区域
+          <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4 mb-4">
+            {/* 原有的表单内容 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               
-              <ModernSelect
-                label="产品系列"
-                value={formData.spu}
-                onChange={handleSpuChange}
-                options={spuOptions}
-                placeholder="选择产品系列"
-                icon={Zap}
-                required
-              />
-
-              <ModernSelect
-                label="具体型号"
-                value={formData.sku}
-                onChange={(value) => handleInputChange('sku', value)}
-                options={availableSkus}
-                placeholder={!formData.spu ? "请先选择产品系列" : "选择具体型号"}
-                icon={Target}
-              />
-
-              <ModernSelect
-                label="语言"
-                value={formData.language}
-                onChange={(value) => handleInputChange('language', value)}
-                options={['chinese', 'english']}
-                placeholder="选择语言"
-                icon={Globe}
-              />
-
-              <ModernSelect
-                label="目标平台"
-                value={formData.target_platform}
-                onChange={(value) => handleInputChange('target_platform', value)}
-                options={platformOptions}
-                placeholder="选择目标平台"
-                icon={MessageSquare}
-              />
-            </div>
-
-            {/* 内容策略 */}
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
-                  <Brain className="w-4 h-4 text-white" />
+              {/* 产品信息 */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                    <Settings className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">产品信息</h3>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800">内容策略</h3>
+                
+                <ModernSelect
+                  label="产品系列"
+                  value={formData.spu}
+                  onChange={handleSpuChange}
+                  options={spuOptions}
+                  placeholder="选择产品系列"
+                  icon={Zap}
+                  required
+                />
+
+                <ModernSelect
+                  label="具体型号"
+                  value={formData.sku}
+                  onChange={(value) => handleInputChange('sku', value)}
+                  options={availableSkus}
+                  placeholder={!formData.spu ? "请先选择产品系列" : "选择具体型号"}
+                  icon={Target}
+                />
+
+                <ModernSelect
+                  label="语言"
+                  value={formData.language}
+                  onChange={(value) => handleInputChange('language', value)}
+                  options={['chinese', 'english']}
+                  placeholder="选择语言"
+                  icon={Globe}
+                />
+
+                <ModernSelect
+                  label="目标平台"
+                  value={formData.target_platform}
+                  onChange={(value) => handleInputChange('target_platform', value)}
+                  options={platformOptions}
+                  placeholder="选择目标平台"
+                  icon={MessageSquare}
+                />
               </div>
 
-              <ModernSelect
-                label="开场钩子"
-                value={formData.opening_hook}
-                onChange={(value) => handleInputChange('opening_hook', value)}
-                options={openingHookOptions}
-                placeholder="选择开场钩子"
-                icon={Sparkles}
-              />
-
-              <ModernSelect
-                label="叙事视角"
-                value={formData.narrative_perspective}
-                onChange={(value) => handleInputChange('narrative_perspective', value)}
-                options={narrativePerspectiveOptions}
-                placeholder="选择叙事视角"
-                icon={Users}
-              />
-
-              <ModernSelect
-                label="内容驱动逻辑"
-                value={formData.content_logic}
-                onChange={(value) => handleInputChange('content_logic', value)}
-                options={contentLogicOptions}
-                placeholder="选择内容驱动逻辑"
-                icon={Target}
-              />
-
-              <ModernSelect
-                label="内容价值主张"
-                value={formData.value_proposition}
-                onChange={(value) => handleInputChange('value_proposition', value)}
-                options={valuePropositionOptions}
-                placeholder="选择内容价值主张"
-                icon={CheckCircle}
-              />
-            </div>
-          </div>
-
-          {/* 产品卖点和场景 */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
-                  <Sparkles className="w-4 h-4 text-white" />
+              {/* 内容策略 */}
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-lg flex items-center justify-center">
+                    <Brain className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">内容策略</h3>
                 </div>
-                <h3 className="text-lg font-bold text-gray-800">产品卖点</h3>
-              </div>
 
-              <ModernMultiSelect
-                label="主打卖点"
-                values={formData.key_selling_points}
-                onToggle={handleSellingPointToggle}
-                onRemove={removeSellingPoint}
-                options={sellingPointsOptions}
-                placeholder="选择主打卖点"
-                icon={Zap}
-                isOpen={sellingPointDropdownOpen}
-                setIsOpen={setSellingPointDropdownOpen}
-                colorScheme="pink"
-              />
+                <ModernSelect
+                  label="开场钩子"
+                  value={formData.opening_hook}
+                  onChange={(value) => handleInputChange('opening_hook', value)}
+                  options={openingHookOptions}
+                  placeholder="选择开场钩子"
+                  icon={Sparkles}
+                />
 
-              <ModernMultiSelect
-                label="具体场景"
-                values={formData.specific_scenario}
-                onToggle={handleScenarioToggle}
-                onRemove={removeScenario}
-                options={specificScenarioOptions}
-                placeholder="选择具体场景"
-                icon={Calendar}
-                isOpen={scenarioDropdownOpen}
-                setIsOpen={setScenarioDropdownOpen}
-                colorScheme="purple"
-              />
-            </div>
+                <ModernSelect
+                  label="叙事视角"
+                  value={formData.narrative_perspective}
+                  onChange={(value) => handleInputChange('narrative_perspective', value)}
+                  options={narrativePerspectiveOptions}
+                  placeholder="选择叙事视角"
+                  icon={Users}
+                />
 
-            <div className="space-y-3">
-              <div className="flex items-center gap-2 mb-3">
-                <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
-                  <Palette className="w-4 h-4 text-white" />
-                </div>
-                <h3 className="text-lg font-bold text-gray-800">受众与风格</h3>
-              </div>
+                <ModernSelect
+                  label="内容驱动逻辑"
+                  value={formData.content_logic}
+                  onChange={(value) => handleInputChange('content_logic', value)}
+                  options={contentLogicOptions}
+                  placeholder="选择内容驱动逻辑"
+                  icon={Target}
+                />
 
-              <ModernSelect
-                label="用户画像"
-                value={formData.user_persona}
-                onChange={(value) => handleInputChange('user_persona', value)}
-                options={userPersonaOptions}
-                placeholder="选择用户画像"
-                icon={Users}
-              />
-
-              <ModernSelect
-                label="内容风格"
-                value={formData.content_style}
-                onChange={(value) => handleInputChange('content_style', value)}
-                options={styleOptions}
-                placeholder="选择内容风格"
-                icon={Palette}
-              />
-
-              <div className="group">
-                <label className="flex items-center gap-1 text-xs font-semibold text-gray-800 mb-2">
-                  <Calendar className="w-3 h-3 text-gray-600" />
-                  节日/时令
-                </label>
-                <input
-                  type="text"
-                  value={formData.holiday_season}
-                  onChange={(e) => handleInputChange('holiday_season', e.target.value)}
-                  placeholder="如：春季草坪护理、夏日庭院时光（可选）"
-                  className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl shadow-sm
-                           hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-50
-                           transition-all duration-200 text-gray-700 text-sm"
+                <ModernSelect
+                  label="内容价值主张"
+                  value={formData.value_proposition}
+                  onChange={(value) => handleInputChange('value_proposition', value)}
+                  options={valuePropositionOptions}
+                  placeholder="选择内容价值主张"
+                  icon={CheckCircle}
                 />
               </div>
             </div>
-          </div>
 
-          {/* AI模型选择 */}
-          <div className="mt-4">
-            <div className="flex items-center gap-2 mb-3">
-              <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
-                <Brain className="w-4 h-4 text-white" />
+            {/* 产品卖点和场景 */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mt-4">
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center">
+                    <Sparkles className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">产品卖点</h3>
+                </div>
+
+                <ModernMultiSelect
+                  label="主打卖点"
+                  values={formData.key_selling_points}
+                  onToggle={handleSellingPointToggle}
+                  onRemove={removeSellingPoint}
+                  options={sellingPointsOptions}
+                  placeholder="选择主打卖点"
+                  icon={Zap}
+                  isOpen={sellingPointDropdownOpen}
+                  setIsOpen={setSellingPointDropdownOpen}
+                  colorScheme="pink"
+                />
+
+                <ModernMultiSelect
+                  label="具体场景"
+                  values={formData.specific_scenario}
+                  onToggle={handleScenarioToggle}
+                  onRemove={removeScenario}
+                  options={specificScenarioOptions}
+                  placeholder="选择具体场景"
+                  icon={Calendar}
+                  isOpen={scenarioDropdownOpen}
+                  setIsOpen={setScenarioDropdownOpen}
+                  colorScheme="purple"
+                />
               </div>
-              <h3 className="text-lg font-bold text-gray-800">AI模型配置</h3>
+
+              <div className="space-y-3">
+                <div className="flex items-center gap-2 mb-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-orange-500 to-red-600 rounded-lg flex items-center justify-center">
+                    <Palette className="w-4 h-4 text-white" />
+                  </div>
+                  <h3 className="text-lg font-bold text-gray-800">受众与风格</h3>
+                </div>
+
+                <ModernSelect
+                  label="用户画像"
+                  value={formData.user_persona}
+                  onChange={(value) => handleInputChange('user_persona', value)}
+                  options={userPersonaOptions}
+                  placeholder="选择用户画像"
+                  icon={Users}
+                />
+
+                <ModernSelect
+                  label="内容风格"
+                  value={formData.content_style}
+                  onChange={(value) => handleInputChange('content_style', value)}
+                  options={styleOptions}
+                  placeholder="选择内容风格"
+                  icon={Palette}
+                />
+
+                <div className="group">
+                  <label className="flex items-center gap-1 text-xs font-semibold text-gray-800 mb-2">
+                    <Calendar className="w-3 h-3 text-gray-600" />
+                    节日/时令
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.holiday_season}
+                    onChange={(e) => handleInputChange('holiday_season', e.target.value)}
+                    placeholder="如：春季草坪护理、夏日庭院时光（可选）"
+                    className="w-full px-3 py-2.5 bg-white border border-gray-200 rounded-xl shadow-sm
+                             hover:border-blue-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-50
+                             transition-all duration-200 text-gray-700 text-sm"
+                  />
+                </div>
+              </div>
             </div>
 
-            <ModernMultiSelect
-              label="AI模型"
-              values={formData.ai_model}
-              onToggle={handleModelToggle}
-              onRemove={removeModel}
-              options={aiModelOptions.map(opt => opt.value)}
-              placeholder="选择AI模型"
-              icon={Brain}
-              isOpen={modelDropdownOpen}
-              setIsOpen={setModelDropdownOpen}
-              colorScheme="blue"
-            />
-          </div>
-
-          {/* 生成按钮 */}
-          <div className="mt-6 flex justify-center">
-            <button
-              onClick={handleGenerate}
-              disabled={isGenerating}
-              className="group relative px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white 
-                       rounded-xl font-semibold shadow-lg hover:shadow-xl
-                       hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed 
-                       transition-all duration-200 transform hover:scale-105"
-            >
-              <div className="flex items-center gap-2">
-                {isGenerating ? (
-                  <>
-                    <Loader2 className="w-5 h-5 animate-spin" />
-                    生成中...
-                  </>
-                ) : (
-                  <>
-                    <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    生成内容
-                  </>
-                )}
+            {/* AI模型选择 */}
+            <div className="mt-4">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="w-8 h-8 bg-gradient-to-br from-cyan-500 to-blue-600 rounded-lg flex items-center justify-center">
+                  <Brain className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-800">AI模型配置(单选)</h3>
               </div>
-              
-              {/* 按钮光效 */}
-              <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
-            </button>
-          </div>
-        </div>
 
-        {/* 生成结果展示区域 */}
-        {generatedContent && (
+              <ModernMultiSelect
+                label="AI模型"
+                values={formData.ai_model}
+                onToggle={handleModelToggle}
+                onRemove={removeModel}
+                options={aiModelOptions.map(opt => opt.value)}
+                placeholder="选择AI模型"
+                icon={Brain}
+                isOpen={modelDropdownOpen}
+                setIsOpen={setModelDropdownOpen}
+                colorScheme="blue"
+              />
+            </div>
+
+            {/* 生成按钮 */}
+            <div className="mt-6 flex justify-center">
+              <button
+                onClick={handleGenerate}
+                disabled={isGenerating}
+                className="group relative px-8 py-3 bg-gradient-to-r from-blue-600 to-purple-600 text-white 
+                         rounded-xl font-semibold shadow-lg hover:shadow-xl
+                         hover:from-blue-700 hover:to-purple-700 disabled:opacity-50 disabled:cursor-not-allowed 
+                         transition-all duration-200 transform hover:scale-105"
+              >
+                <div className="flex items-center gap-2">
+                  {isGenerating ? (
+                    <>
+                      <Loader2 className="w-5 h-5 animate-spin" />
+                      生成中...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
+                      生成内容
+                    </>
+                  )}
+                </div>
+                
+                {/* 按钮光效 */}
+                <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 opacity-0 group-hover:opacity-20 transition-opacity duration-200"></div>
+              </button>
+            </div>
+          </div>
+        ) : (
+          // 生成结果展示区域
           <div className="bg-white/70 backdrop-blur-sm rounded-2xl shadow-lg border border-white/50 p-4">
-            <div className="flex items-center gap-2 mb-4">
-              <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                <CheckCircle className="w-4 h-4 text-white" />
+            {/* 返回编辑按钮 */}
+            <div className="flex justify-between items-center mb-4">
+              <div className="flex items-center gap-2">
+                <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
+                  <CheckCircle className="w-4 h-4 text-white" />
+                </div>
+                <h3 className="text-lg font-bold text-gray-800">生成结果</h3>
               </div>
-              <h3 className="text-lg font-bold text-gray-800">生成结果</h3>
+              <button
+                onClick={handleBackToEdit}
+                className="flex items-center gap-2 px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-800 
+                         bg-white/50 hover:bg-white/80 rounded-lg transition-colors duration-200 border border-gray-200"
+              >
+                <PenTool className="w-4 h-4" />
+                返回编辑
+              </button>
             </div>
             
             <div className="space-y-4">
